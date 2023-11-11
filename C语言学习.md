@@ -65,23 +65,8 @@
     }
 ```
 
-## printf打印格式
+## printf基本使用
 
-> 打印字符格式的数据
-
-- %d - 打印int类型的整型
-- %c - 打印字符
-- %s - 表示输入一个字符串
-- %lf - 表示输入一个双精度浮点数
-- %f - 打印浮点数 - 小数
-- %ld - 表示输入一个长整数。
-- %p - 以地址的形式打印 (每一块内存空间都有着自己的地址)(占位符将会被实际指针的十六进制表示所替代)
-- %x - 打印16进制
-- %zd - 打印size_t类型(为typedef定义的类型实际就是unsigned int)的参数的整数
-- %u - 打印无符号整数(包括负数---负数打印的结果为负数的绝对值与无符号整型的取值范围取模后得到的结果)
-- %nd - 输出的整数占n位，不足n位则在前面补空格(n为整数)
-- %-nd - 输出的整数占n位，不足n位则在后面补空格(n为整数)
-- ...
 
 **代码演示**
 
@@ -95,8 +80,11 @@
     */
     char sex = 'A';
     printf("sex = %c\n", sex);// sex = A
-
 ```
+
+[详细使用请参考**printf打印格式**](#printf打印格式)
+
+---
 
 # 基本数据类型
 
@@ -128,6 +116,9 @@
 ```
 
 > 注意： 当`sizeof()`的值为类型时，括号不可以省略
+>
+> [具体细节请参照`sizeof`](#sizeof)
+
 
 ---
 
@@ -1472,8 +1463,6 @@ js当中 `5 / 2 = 2.5`
         printf("price = %d\n", book.price);// price = 0
         printf("name = %s\n", book.name);// name =
                                         //小小汪
-
-        
     };
 ```
 
@@ -1506,23 +1495,13 @@ js当中 `5 / 2 = 2.5`
     }
 ```
 
----
-
-## strcpy()
-
-语法：`strcpy(目标字符串, 源字符串);`
-
-`char *strcpy(char *dest, const char *src)`
-
-
-> `strcpy`方法是一个字符串复制函数，用于将一个字符串复制到另一个字符串中。需要注意的是，`strcpy`函数不会检查目标字符串的长度，如果目标字符串的空间不足以容纳源字符串，则会导致**内存溢出**的问题。因此，在使用`strcpy`函数时需要确保目标字符串有足够的空间来容纳源字符串。
-
+> [strcpy的使用详细请参见`strcpy`](#strcpy)
 
 ---
 
-## 操作符 `.`
 
-## 操作符 `->`
+
+## 操作符 `->`与`.`
 
 ```c
     struct Book
@@ -1550,6 +1529,100 @@ js当中 `5 / 2 = 2.5`
         printf("name = %s\n", (*pb).name);
     }
 ```
+
+---
+
+## typedef与struct连用
+
+```c
+    /*
+    这里是将struct Students定义为有typedef定义的自定义类型
+    而Stu是类型名 --- 一定在加分号
+    */
+    typedef struct Students
+    {
+        char id[20];
+        char name[20];
+        char telephone[12];
+    }Stu;
+
+    int main()
+    {
+        Stu s = {"001","wjn","123567"};
+        return 0;
+    }
+```
+
+---
+
+## struct嵌套
+
+```c
+    struct Stu
+    {
+        char* id;
+        char name[20];
+    };
+
+    struct T
+    {
+        double d;
+        struct Stu s;
+    };
+    //实现
+    int main()
+    {
+        char idw[] = "001";
+	    struct T t = { 3.14,{idw, "wjn"}};
+        printf("%lf\n", t.d);
+        // %s 打印
+        printf("%s\n", t.s.id);
+        printf("%s\n", t.s.name);
+        return 0;
+    }
+
+```
+
+> `printf("%s")`会从该地址开始打印字符，直到遇到`\0`字符为止，因此整个字符串都被打印出来了。这是printf函数的特性，它会一直打印直到遇到`\0`字符为止。
+
+---
+
+## struct作为参数传递时
+
+```c
+    struct Stu {
+        char* id;
+        char name[20];
+    };
+
+    struct T {-
+        double d;
+        struct Stu s;
+    };
+
+    void print1(struct T t) {
+        printf("%lf\n", t.d);
+    }
+    /*
+        虽然print1和print2效果一致，但是在性能上指针的做法会更好，
+        因为print1在实现传参时会重新为结构体开辟一块空间。
+        而指针只需要开启一个4或8(看系统)的空间就够了
+    */
+    void print2(struct T* t) {
+        printf("%lf\n", t -> d);
+    }
+    
+    int main() {
+        char idw[] = "001";
+        struct T t = { 3.14, {idw, "wjn"}};
+        print1(t);
+        print2(&t);
+        return 0;
+    }
+    
+```
+
+---
 
 # if while do...while switch continue
 
@@ -1844,6 +1917,53 @@ js当中 `5 / 2 = 2.5`
     //在输入时应写--- 1 2 3
     scanf("%d %d %d", &i, &z, &y);
 ```
+
+---
+
+## printf打印格式
+
+> 打印字符格式的数据
+
+- %d - 打印int类型的整型
+- %c - 打印字符
+- %s - 表示输入一个字符串
+- %lf - 表示输入一个双精度浮点数
+- %f - 打印浮点数 - 小数
+- %ld - 表示输入一个长整数。
+- %p - 以地址的形式打印 (每一块内存空间都有着自己的地址)(占位符将会被实际指针的十六进制表示所替代)
+- %x - 打印16进制
+- %zd - 打印size_t类型(为typedef定义的类型实际就是unsigned int)的参数的整数
+- %u - 打印无符号整数(包括负数---负数打印的结果为负数的绝对值与无符号整型的取值范围取模后得到的结果)
+- %nd - 输出的整数占n位，不足n位则在前面补空格(n为整数)
+- %-nd - 输出的整数占n位，不足n位则在后面补空格(n为整数)
+- ...
+
+---
+
+# string.h头文件 
+
+## strlen()
+
+> 计算字符串长度，不包括`\0`
+
+---
+
+## strcpy()
+
+语法：`strcpy(目标字符串, 源字符串);`
+
+`char *strcpy(char *dest, const char *src)`
+
+
+> `strcpy`方法是一个字符串复制函数，用于将一个字符串复制到另一个字符串中。需要注意的是，`strcpy`函数不会检查目标字符串的长度，如果目标字符串的空间不足以容纳源字符串，则会导致**内存溢出**的问题。因此，在使用`strcpy`函数时需要确保目标字符串有足够的空间来容纳源字符串。
+
+---
+
+## strcmp()
+
+语法:`int strcmp(const char *str1, const char *str2);`
+
+> 该函数接受两个参数，分别是要比较的两个字符串str1和str2。如果两个字符串相等，函数返回值为0；如果str1小于str2，返回值为负数；如果str1大于str2，返回值为正数。
 
 ---
 
