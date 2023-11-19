@@ -139,3 +139,149 @@
     }
 ```
 
+---
+
+# 指针进阶
+
+## 指针形式的终极奥义
+
+arr[i] = *(arr + i) = *(pi + 1) = pi[i] 
+
+```c
+    int main()
+    {
+        int arr[3] = {1,2,3};
+        //首元素地址
+        int* pi = arr;
+        int i = 0;
+        for(i = 0; i < 3; i++)
+        {
+            //arr[i] = *(arr + i) = *(pi + 1) = pi[i] 
+            // printf("%d ", *(arr + i));
+            printf("%d ", pi[i]);
+        }
+    }
+    
+```
+
+---
+
+## 指针形式的绕口令
+
+```c
+    int arr[5]; // ===> 存储5个元素的整型数组
+    int* arr[5];// ===> 存储5个(int*)指针的指针数组
+    int(*arr)[5];// ===> 数组指针，指向的值类型int [5]
+
+    /*
+        ===> 一个存储数组指针的数组。
+        拆分开为 ===> 1. arr[5]  2. int* [3]
+        arr[5]是一个数组，存储的指针的类型为int* [3]
+    */
+    int (*arr[5])[3];
+
+    int* (arr[5]) [3];
+```
+
+---
+
+## 数组参数--指针参数
+
+### 一维数组首元素地址作为参数
+
+写法:`int* pi -- int arr[]`
+
+```c
+    #include <stdio.h>
+
+    // void test(int arr[]) { //首元素地址
+    void test(int* pi) { //首元素地址
+        printf("hehe");
+    };
+
+    int main() {
+        int arr[] = {1,2,3};
+        test(arr);
+        test(&arr[0]);
+        return 0;
+    };
+```
+
+---
+
+### 一维指针数组首元素地址作为参数
+
+写法:`char* arr[] -- char** arr`
+
+```c
+    // void test(char* arr[]) {
+    void test(char** arr) {
+        printf("hehe");
+    }
+
+    int main() {
+        //把常量字符串的a的地址传递过去，其实还是传递首元素地址
+        char* pc = "abcd";
+        char* arr[] = { pc };
+        /*
+            这里的类型是char*是一个指针,而数组作为参数,传的是首元素地址
+            在这里也就是指针的地址,所以用二级指针作为形参
+        */
+        test(arr);
+        return 0;
+    };
+```
+
+---
+
+### 二维数组首元素地址作为参数
+
+写法:`arr[][column] -- int (*arr)[column]`
+
+```c
+    // void test(arr[2][4]) {
+    void test(int (*arr)[4]) {    
+        printf("hehe");
+    }
+
+    int main() {
+        /*
+            二维数组的第一行也就是一个数组,
+            所以传递首元素地址为一个数组
+        */
+        int arr[2][4] = { 0 };
+        test(arr);
+        return 1;
+    }
+```
+
+> [关于二维数组的知识参考**二维数组**](./C语言学习.md#二维数组)
+
+---
+
+## 函数指针
+
+```c
+    int Add(int x, int y) {
+        return x + y;
+    };
+
+    void Print(char* pc) {
+        printf("%s\n", pc);
+    };
+
+    int main() {
+        /*
+            函数也是有地址的
+        */
+        int (*fun)(int, int) = Add;
+        // int (*fun)(int x, int xiaozhupeiqi) = &Add;// 变量名可写可不写,也可以乱写
+        printf("%d\n", (*fun)(1, 2));// 3
+        printf("%p\n", Add);// Add 和 &Add功能一样
+        printf("%p\n", &Add);
+
+        void (*char_fun)(char*) = Print;
+        (*char_fun)("abcdefg");// abcdefg
+        return 0;
+    }
+```
