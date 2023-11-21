@@ -279,9 +279,128 @@ arr[i] = *(arr + i) = *(pi + 1) = pi[i]
         printf("%d\n", (*fun)(1, 2));// 3
         printf("%p\n", Add);// Add 和 &Add功能一样
         printf("%p\n", &Add);
-
         void (*char_fun)(char*) = Print;
-        (*char_fun)("abcdefg");// abcdefg
+        /*
+            在调用时char_fun前面的*没有用,可以不加,也可以一直加
+            可以理解为函数Print就是一个地址,然后调用,而char_fun
+            存储它的地址,所以可以直接(char_fun)("abcdefg");
+        */
+        (char_fun)("abcdefg");// abcdefg
+        // (*char_fun)("abcdefg");// abcdefg
+        // (**char_fun)("abcdefg");// abcdefg
+        // (***char_fun)("abcdefg");// abcdefg
         return 0;
     }
 ```
+
+---
+
+### 函数指针的例题(面试题)
+
+```c
+    /*
+        首先把0强制转换为函数指针类型 ===> (void(*)())0
+        然后解引用 ===> *((void(*)())0)
+        函数调用 ===> *((void(*)())0)()
+        当然这个函数运行异常(面试题容易考)
+    */
+    *((void(*)())0)();
+    /*
+        1.*signal(int, void(*)(int)) ===> 这时还没有写返回值类型,这个函数指针
+        有两个参数1.int 2.void(*)(int)函数指针
+        它的返回值为void (int)也就是返回一个函数指针
+        2.signal是一个函数声明
+        signal函数的参数有2个,第一个是int,第二个是函数指针,该函数指针参数为int,返回值为void. signal函数返回值也是一个函数指针,该指针参数为int,返回值为void
+    */
+    void test(void (*signal(int, void(*)(int))) (int)) {};
+    /*
+        简化
+    */
+    typedef void(*)(int) func_int;
+    func_int (signal(int, func_int));
+```
+
+---
+
+## 函数指针的数组
+
+语法格式:`type (*name[num])(...args)`
+
+> 函数指针的数组的使用是一种**策略模式**
+>
+> [关于策略模式的详细请参考**策略模式详细**](./show_detail/detail.md#策略模式)
+
+```c
+int Add(int x, int y)
+{
+	return x + y;
+}
+int Subtract(int x, int y)
+{
+	return x - y;
+}
+int Multiplication(int x, int y)
+{
+	return x * y;
+}
+int Division(int x, int y)
+{
+	return x / y;
+}
+
+int main()
+{
+    int(*add)(int, int) = Add;
+	int(*subtract)(int, int) = Subtract;
+	int(*multiplication)(int, int) = Multiplication;
+	int(*division)(int, int) = Division;
+    //存放形式
+	int(*arr[4])(int, int) = {add, subtract, multiplication, division};
+    int i = 0;
+    for(i = 0; i < 4; i++) {
+        //因为函数名就是地址,可以直接调用
+        arr[i](2,3)
+    }
+    return 0;
+}
+```
+
+---
+
+## 指向函数指针数组的指针
+
+```c
+    //函数指针数组
+    int (*arr[5])(int, int) = { 0, Add ,Subtract,Div ,Mul };
+    /*
+        函数指针数组的指针
+        int (* [5])(int, int) 为函数指针数组的类型
+    */
+    int(*(*pp_arr)[5])(int, int) = &arr;
+    //如果能够正常使用,证明没有写错
+    printf("%d\n", (*pp_arr)[1](1, 2));// 3
+```
+
+---
+
+## 回调函数
+
+> 回调函数不是自身调用.而是将函数通过指针指向在特定条件下调用.
+
+```c
+    void print() {
+        printf("hehe");
+    }
+    void test(void (*pfunc)()) {
+        pfunc();
+    }
+
+    int main() {
+        test(print);
+        return 0;
+    }
+```
+
+> [更加贴近实际的应用请参考鹏哥C语言指针详细(5)](https://www.bilibili.com/video/BV1q54y1q79w/?p=36)
+
+``````

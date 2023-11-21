@@ -65,3 +65,64 @@
 这时,如果有效数字M全为0.表示无穷大 (正负取决于符号位s )
 
 > 当E为全1时,即11111111 --转二--> 255 - 127 = 128. 而`1.xxx * 2^126`这又是一个很大的数,表示无穷大.
+
+---
+
+# 策略模式
+
+> 在编程中，策略模式是一种设计模式，它允许在运行时选择算法的行为。它定义了一系列算法，将每个算法封装起来，并使它们可以互相替换。这样就可以在不改变使用算法的客户端代码的情况下，动态地选择算法。策略模式使得算法可以独立于客户端而变化，从而提高了代码的灵活性和可维护性.
+
+js代码演示
+```js
+const handleType = {
+    text(response) {//为response
+
+        return response.toString();
+    },
+    json(response) {
+        try {
+            return JSON.parse(response);
+        } catch (error) {
+            //如果json转换除了问题进这里
+            return response;
+        }
+    }
+};
+//按需引用
+```
+
+---
+
+c代码演示
+```c
+int main()
+{
+	int input = 0;
+	int x = 0;
+	int y = 0;
+    //加减乘除功能
+	int (*arr[5])(int, int) = { 0, Add ,Subtract,Div ,Mul };
+	do {
+		printf("**********************\n");
+		printf("***1.Add 2.Subtract***\n");
+		printf("*****3.Div 4.Mul******\n");
+		printf("******  0.exit  ******\n");
+		scanf("%d", &input);
+		if (input >= 1 && input <= 4)
+		{
+			printf("输入两个操作数进行运算\n");
+			scanf("%d%d", &x, &y);
+			printf("结果为:%d\n", arr[input](x, y));
+		}
+		else if (input == 0)
+		{
+			printf("已退出\n");
+			break;
+		}
+		else {
+			printf("选择错误\n");
+		}
+	} while (input);
+	return 0;
+}
+```
