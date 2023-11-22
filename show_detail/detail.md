@@ -126,3 +126,70 @@ int main()
 	return 0;
 }
 ```
+
+---
+
+# qsort()的使用
+
+```c
+#include <stdlib.h>
+typedef struct Stu
+{
+	char name[20];
+	int age;
+}Stu;
+/*
+    qsort是一个通用的排序函数,而const void*的设计就可以保证传递的参数
+    可以很好的被接收, 而在使用过程中通过强制类型转换得到自己需要的类型并使用
+*/
+int compare_struct(const void* a, const void* b)
+{
+    //通过结构体参数的年龄比较
+	return (((Stu*)a) -> age - ((Stu*)b) -> age);
+}
+
+int main()
+{
+    Stu str_arr[4] = { {"汪加年", 18},{"小小汪",19},{"励志汪",20},{"我们汪", 16} };
+    int length = sizeof(str_arr) / sizeof(str_arr[0]);
+    //因为是结构体,使用打印不方便所以需要在控制台上查看
+    qsort(str_arr, length, sizeof(str_arr[0]), compare_struct);
+    return 0;
+}
+```
+
+---
+## 字符串的比较方式
+
+`qsort()`配合`strcmp()`一起使用
+
+> strcmp函数比较两个字符串的规则是按照它们在ASCII码表中的顺序进行比较。具体来说，strcmp函数会逐个比较两个字符串对应位置上的字符的ASCII码值，直到遇到不相等的字符或者其中一个字符串的结束符'\0'。
+
+实现通过姓名排序
+```c
+typedef struct Stu
+{
+	char name[10];
+	int age;
+}Stu;
+
+int compare_struct_by_name(const void* a, const void* b)
+{
+	return strcmp(((Stu*)a)->name, ((Stu*)b)->name);
+}
+
+int main()
+{
+    Stu str_arr[4] = { {"wjn",12},{"list", 20},{"abc",20},{"da", 20} };
+    int len = sizeof(str_arr) / sizeof(str_arr[0]);
+    /*
+        证明字符串是通过一一对应元素地址的ASCII码值比较
+        那么比较结果应该是 abc da list wjn
+        只有在首元素对比相等的情况下,才会进行第二轮元素开始比较,以此类推
+    */
+    qsort(str_arr, len, sizeof(str_arr[0]), compare_struct_by_name);
+    return 0;
+}
+```
+
+![struct已name排序结果](../img/struct排序结果.png "struct已name排序结果")

@@ -1891,7 +1891,7 @@ js当中 `5 / 2 = 2.5`
 
 ---
 
-# stdlib.h
+# stdlib.h头文件
 
 > 全称: standard library 标准库
 
@@ -1947,12 +1947,33 @@ js当中 `5 / 2 = 2.5`
 
 ## srand()
 
-语法：`void srand(unsigned int seed);`
+语法：`void srand(unsigned int seed)`
 
 > srand函数用于设置随机数生成器的种子，一般使用当前时间作为种子。
 
 ---
 
+## qsort()
+
+原型: `void qsort(void *base, size_t number, size_t size, int (*compare)(const void *, const void *))`
+
+- base: 指向要排序的数组的指针
+- number: 数组中元素的个数
+- size: 每个元素的大小（以字节为单位）
+- compare: 比较函数的指针，用于确定元素的顺序
+
+compare函数指针细节: `int compare(const void *a, const void *b)`
+
+在比较函数compare中，返回值代表着两个元素的大小关系。
+这样，qsort函数根据比较函数的返回值来确定元素的顺序，从而实现对数组的排序。
+
+- 返回值 > 0 表示第二个元素应该排在第一个元素之前
+- 返回值 = 0 表示两个元素相等，它们的相对位置不变
+- 返回值 < 0 表示第一个元素应该排在第二个元素之前
+
+> 具体使用参考
+
+---
 
 # time.h头文件
 
@@ -2063,6 +2084,9 @@ return value: destination string(目标字符串)
 语法:`int strcmp(const char *str1, const char *str2);`
 
 > 该函数接受两个参数，分别是要比较的两个字符串str1和str2。如果两个字符串相等，函数返回值为0；如果str1小于str2，返回值为负数；如果str1大于str2，返回值为正数。
+>
+> [关于`strcmp`如何排列字符串的请参考字符串的比较方式](./show_detail/detail.md#字符串的比较方式)
+
 
 ---
 
