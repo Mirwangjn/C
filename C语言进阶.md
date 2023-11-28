@@ -147,6 +147,8 @@
 
 arr[i] = *(arr + i) = *(pi + 1) = pi[i] 
 
+arr[x][y] = \*(*(arr + x) + y)
+
 ```c
     int main()
     {
