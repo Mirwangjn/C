@@ -320,6 +320,8 @@ const修饰的值无法改变, 但可以改变指针的指向地址(悄悄的花
 
 1. 限制*b解引用改变值(不让女朋友乱花男朋友钱)
 
+`const int* b === int const *b`
+
 ```c
     const int a = 1;
     const int* b = &a;
@@ -328,7 +330,7 @@ const修饰的值无法改变, 但可以改变指针的指向地址(悄悄的花
     printf("%d\n", a);// 20
 ```
 
-2. 限制b改变值(不让女朋友因为不给她买吃的而找其他男朋友)
+1. 限制b改变值(不让女朋友因为不给她买吃的而找其他男朋友)
 
 ```c
     int i = 100;
@@ -2037,9 +2039,13 @@ compare函数指针细节: `int compare(const void *a, const void *b)`
 
 ## strlen()
 
-语法: `int strlen(const char* str)`
+语法: `size_t strlen(const char* str)`
+
+`size_t` --> `unsigned int`
 
 > 计算字符串长度，不包括`\0`
+>
+> 当无符号数 - 无符号数时结果也是一个无符号数, 是一个>=0的数
 
 ---
 
@@ -2060,7 +2066,7 @@ return value: destination string(目标字符串)
     /*
         const char* 意味着指针指向的元素的类型为 const char
 	    所以这么做是防止在编写这个函数的时候搞混参数
-    */
+    */s
     void my_strcpy(char* dest, const char* src) {
         if(dest == NULL || src == NULL) return;
 
@@ -2102,6 +2108,30 @@ return value: destination string(目标字符串)
 >
 > [关于`strcmp`如何排列字符串的请参考字符串的比较方式](./show_detail/detail.md#字符串的比较方式)
 
+---
+
+## strcat()
+
+语法: `char* strcat(char* dest, const char* src)`
+
+功能:合并字符串
+
+- dest -- 目标字符数组,且**足够容纳追加后的字符串。**
+- src -- 指向要追加的字符串，该字符串不会覆盖目标字符串。
+
+> 注意点`strcat`无法自己追加自己
+
+---
+
+## strncat()
+
+语法: `char* strncat(char* dest, const char* src, size_t n)`
+
+功能:合并字符串,且可以合并自己
+
+- dest -- 目标字符数组, 且足够容纳追加后的字符串，包括额外的空字符。
+- src -- 要追加的字符串。
+- n -- 要追加的最大字符数。
 
 ---
 
