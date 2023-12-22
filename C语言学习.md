@@ -2063,11 +2063,15 @@ compare函数指针细节: `int compare(const void *a, const void *b)`
 
 语法: `size_t strlen(const char* str)`
 
-`size_t` --> `unsigned int`
+- str -- 要计算长度的字符串.
 
-> 计算字符串长度，不包括`\0`
+返回值: 字符串的长度.
+
+> 1. 计算字符串长度时，不包括`\0`
 >
-> 当无符号数 - 无符号数时结果也是一个无符号数, 是一个>=0的数
+> 2. 返回值类型`size_t`实际上是`typedef unsigned int size_t`
+>
+> 3. 当无符号数 - 无符号数时结果也是一个无符号数, 是一个>=0的数
 
 ---
 
@@ -2118,7 +2122,8 @@ return value: destination string(目标字符串)
 > [关于const char类型请参考`const修饰指针`](#const修饰指针)
 >
 > [关于assert使用请参考`assert.h`](#asserth头文件)
-
+>
+> 查看源文件查考`D:\Windows Kits\10\Source\10.0.22621.0\ucrt`
 
 ---
 
@@ -2126,7 +2131,18 @@ return value: destination string(目标字符串)
 
 语法:`int strcmp(const char *str1, const char *str2);`
 
+- str1 -- 要进行比较的第一个字符串.
+- str2 -- 要进行比较的第二个字符串.
+
+返回值如下:
+
+- 如果返回值 < 0，则表示 str1 小于 str2。
+- 如果返回值 > 0，则表示 str1 大于 str2。
+- 如果返回值 = 0，则表示 str1 等于 str2。
+
 > 该函数接受两个参数，分别是要比较的两个字符串str1和str2。如果两个字符串相等，函数返回值为0；如果str1小于str2，返回值为负数；如果str1大于str2，返回值为正数。
+>
+> 在VS编辑器下str1 大于 str2返回值为-1; str1 小于 str2返回值为1
 >
 > [关于`strcmp`如何排列字符串的请参考字符串的比较方式](./show_detail/detail.md#字符串的比较方式)
 
@@ -2147,13 +2163,46 @@ return value: destination string(目标字符串)
 
 ## strncat()
 
-语法: `char* strncat(char* dest, const char* src, size_t n)`
+语法: `char* strncat(char* dest, const char* src, size_t count)`
 
 功能:合并字符串,且可以合并自己
 
 - dest -- 目标字符数组, 且足够容纳追加后的字符串，包括额外的空字符。
 - src -- 要追加的字符串。
-- n -- 要追加的最大字符数。
+- count -- 要追加的最大字符数。
+
+> - 追加`count`个字符之后会主动补一个`'\0'`
+> - 当`count` > 实际的`src`长度时, 多余的部分直接放弃不管
+> 
+> [strncat的注意点参考strncat的细节](./show_detail/detail.md#strncat的细节)
+
+---
+
+## strstr()
+
+语法: `char* strstr(const char* haystack, const char* needle)`
+
+- haystack -- 要被检索的 C 字符串。
+- needle -- 在 haystack 字符串内要搜索的小字符串。
+
+返回值: haystack 中第一次出现 needle 字符串的位置，如果未找到则返回`NULL空指针`
+
+---
+
+## strncpy()
+
+语法: `char* strncpy(char *dest, const char *src, size_t count)`
+
+- dest -- 指向用于存储复制内容的目标数组。
+- src -- 要复制的字符串。
+- count -- 要从源中复制的字符数。
+
+返回值: 最终dest被复制完成后的结果
+
+> 如果`count`的长度大于`src`, 超出的长度会给dest补`0`
+>
+> [strncpy的注意点参考strncpy的细节](./show_detail/detail.md#strncpy的细节)
+
 
 ---
 
@@ -2174,6 +2223,11 @@ return value: destination string(目标字符串)
 >> **宏 assert 的定义依赖于标准库不定义的另一个宏 NDEBUG 。** 
 
 ---
+
+## C内置函数
+
+---
+
 # 辗转相除法
 
 作用:计算最大公约数

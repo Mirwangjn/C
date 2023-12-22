@@ -163,7 +163,8 @@ int main()
 
 `qsort()`配合`strcmp()`一起使用
 
-> strcmp函数比较两个字符串的规则是按照它们在ASCII码表中的顺序进行比较。具体来说，strcmp函数会逐个比较两个字符串对应位置上的字符的ASCII码值，直到遇到不相等的字符或者其中一个字符串的结束符'\0'。
+> strcmp函数比较两个字符串的规则是按照它们在ASCII码表中的顺序进行比较。
+> 具体来说，strcmp函数会逐个比较两个字符串对应位置上的字符的ASCII码值，直到遇到不相等的字符或者其中一个字符串的结束符'\0'。
 
 实现通过姓名排序
 ```c
@@ -193,3 +194,35 @@ int main()
 ```
 
 ![struct已name排序结果](../img/struct排序结果.png "struct已name排序结果")
+
+---
+
+# strncpy的细节
+
+```c
+    int main()
+    {
+        char ch1[10] = "deffabc";
+        char ch2[] = "abc";
+        char* pc = strncpy(ch1, ch2, 6);//当需要追加的字符超过实际的原字符串时	
+        return 0;
+    }
+```
+
+![strncpy的细节](../img/strncpy的细节.png "超出的长度会给dest补0")
+
+---
+
+# strncat的细节
+
+```c
+    int main()
+    {
+        char ch1[30] = "deffabc\0xxxxxx";
+        char ch2[] = "abc";
+        strncat(ch1, ch2, 10);//当需要追加的字符超过实际的原字符串时
+        return 0;
+    } 
+```
+
+![strncat的细节](../img/strncat的细节.png "超出的部分不管")
