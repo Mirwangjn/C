@@ -2161,6 +2161,17 @@ return value: destination string(目标字符串)
 
 ---
 
+## strstr()
+
+语法: `char* strstr(const char* haystack, const char* needle)`
+
+- haystack -- 要被检索的 C 字符串。
+- needle -- 在 haystack 字符串内要搜索的小字符串。
+
+返回值: `haystack`中第一次出现`needle`字符串的位置的地址，如果未找到则返回`NULL空指针`
+
+---
+
 ## strncat()
 
 语法: `char* strncat(char* dest, const char* src, size_t count)`
@@ -2178,17 +2189,6 @@ return value: destination string(目标字符串)
 
 ---
 
-## strstr()
-
-语法: `char* strstr(const char* haystack, const char* needle)`
-
-- haystack -- 要被检索的 C 字符串。
-- needle -- 在 haystack 字符串内要搜索的小字符串。
-
-返回值: haystack 中第一次出现 needle 字符串的位置，如果未找到则返回`NULL空指针`
-
----
-
 ## strncpy()
 
 语法: `char* strncpy(char *dest, const char *src, size_t count)`
@@ -2202,7 +2202,6 @@ return value: destination string(目标字符串)
 > 如果`count`的长度大于`src`, 超出的长度会给dest补`0`
 >
 > [strncpy的注意点参考strncpy的细节](./show_detail/detail.md#strncpy的细节)
-
 
 ---
 
@@ -2219,8 +2218,13 @@ return value: destination string(目标字符串)
 ```
 
 > 当定义了`NDEBUG`宏时，`assert`宏将被禁用，程序将不会执行这些检查，从而提高
+> 
 > 程序的执行效率。通常在发布版本中使用`NDEBUG`宏来禁用`assert`宏，以避免不必要的开销和性能损失。
->> **宏 assert 的定义依赖于标准库不定义的另一个宏 NDEBUG 。** 
+> 
+> - 宏 assert 的定义依赖于标准库不定义的另一个宏 NDEBUG 
+> - ASSERT 只有在 Debug 版本中才有效，如果编译为 Release 版本则被忽略。
+
+
 
 ---
 
