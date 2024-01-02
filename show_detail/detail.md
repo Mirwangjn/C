@@ -197,7 +197,9 @@ int main()
 
 ---
 
-# strncpy的细节
+# <string.h>使用
+
+## strncpy的细节
 
 ```c
     int main()
@@ -213,7 +215,7 @@ int main()
 
 ---
 
-# strncat的细节
+## strncat的细节
 
 ```c
     int main()
@@ -226,3 +228,43 @@ int main()
 ```
 
 ![strncat的细节](../img/strncat的细节.png "超出的部分不管")
+
+---
+
+## strtok使用细节
+
+`strtok`函数会修改原始字符串，将分隔符替换为`'\0'`，因此在后续调用中，
+它会继续从上一次分解的位置开始。另外，strtok函数不是线程安全的，
+因为它使用了静态变量来保存上一次分解的位置。
+
+```c
+    int main()
+    {
+        char ch[] = "2041@qq.com";
+        char copy[30] = { 0 };
+        strcpy(copy, ch);
+        char* sep = "@.";
+        char* ret = NULL;
+
+        for (ret = strtok(copy, sep); ret != NULL; ret = strtok(NULL, sep))
+        {
+            printf("%s\n", ret);
+        }
+        return 0;
+    }
+```
+
+![strtok使用细节](../img/strtok使用细节.png)
+
+---
+
+## memcpy基本使用
+
+```c
+    int arr1[3] = { 1,2,3 };
+	int arr2[3] = { 0 };
+	my_memcpy(arr2, arr1, sizeof(arr1));
+```
+
+![memcpy基本使用情况](../img/memcpy基本使用.png "memcpy基本使用情况")
+

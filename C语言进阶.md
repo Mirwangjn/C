@@ -458,3 +458,115 @@ void*是一种指针类型，可以指向任何类型的数据(没警告)。
 > [strlen的用法请参考`strlen`](./C语言学习.md#strlen-1)
 > 
 > [更多指针例题请参考**指针例题**](./show_detail/指针例题.md#例题)
+
+# 结构体进阶
+
+## 结构体声明注意点
+
+```c
+struct Stu
+{
+	char name[20];
+	int age;
+}s;
+
+int main()
+{
+    //s = { "wangjianian", 20 }; error报错
+	s = (struct Stu){ "wangjianian", 20 };// 结构体的初始化不能在定义时直接赋值
+	printf("%s %d\n", s.name, s.age);
+	return 0;
+}
+```
+
+---
+
+## 匿名结构体(了解)
+
+没有名字的结构体
+
+```c
+//第一种
+struct
+{
+	char name[20];
+	int age;
+}student;
+```
+
+```c
+struct
+{
+	char name[20];
+	int age;
+}student = { "wangjianian", 20 };//只能用一次
+
+int main()
+{
+	printf("%s %d\n", student.name, student.age);// wangjianian 20
+	return 0;
+}
+```
+
+> 第一种虽然可以这样声明, 但是却无法在`main`函数中正常初始化(使用).
+> 因为这时`student`的结构体类型是`匿名结构体`无法进行强制类型转换
+>
+> 如果需要使用, 则需要使用第二种
+
+---
+
+### 匿名结构体使用注意点
+
+```c
+struct 
+{
+	char name[20];
+	int age;
+}s1;
+
+struct
+{
+	char name[20];
+	int age;
+}* s2;//匿名结构体指针
+
+int main()
+{
+    //warning C4133: “=”: 从“*”到“*”的类型不兼容
+	s2 = &s1;//虽然俩个结构体长得一样, 但根本就不是一回事
+	return 0;
+}
+```
+
+---
+
+## 结构体的自引用
+
+- 错误的自引用
+
+```c
+struct Node
+{
+	char name[20];
+    //当使用sizeof计算时, 根本就无法计算. 而且在编码时也会报错
+	// struct Node n;
+};
+```
+
+- 正确的自引用
+
+```c
+struct Node
+{
+	char val;
+    //链表的思路
+	struct Node* next;
+};
+
+int main()
+{
+    struct Node n = {0};
+    printf("%d\n", (int)sizeof(n));//32 因为我是64平台,指针占8个字节
+    return 0;
+}
+```
