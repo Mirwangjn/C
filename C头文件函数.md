@@ -420,4 +420,33 @@ return value: destination string(目标字符串)
 
 ---
 
-## 
+# <stddef.h>
+
+## offsetof()
+
+语法: `offsetof(structName, memberName)`
+
+作用: 计算结构成员相对于结构体开头的字节偏移量
+
+- structName -- 结构体类型名
+- memberName -- 结构体成员名
+
+返回值: 该宏返回类型为`size_t`的值，表示`structName`中成员(memberName)的偏移量。
+
+```c
+#include <stddef.h>
+
+struct S1
+{
+	char c1;// 1
+    // 7
+	double d;// 8
+};
+
+int main()
+{
+	struct S1 s1 = { 0 };
+	printf("%zd\n", offsetof(struct S1, d));// 8
+	return 0;
+}
+```
