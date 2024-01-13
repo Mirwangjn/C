@@ -420,6 +420,60 @@ return value: destination string(目标字符串)
 
 ---
 
+## toupper()
+
+语法: `int toupper(int c)`
+
+作用: 把小写字母转换为大写字母
+
+- c -- 要被转换为大写的字母.
+
+返回值: 如果`c`有相对应的大写字母，则该函数返回`c`的大写字母，否则`c`保持不变。返回值是一个可被隐式转换为 char 类型的 int 值。
+
+```c
+//需注意str参数不能是常量字符串,否则会报错访问冲突问题    
+char* toUpperCase(char* str)
+{
+	char* result = str;
+	while (*str != '\0')
+	{
+		*str = toupper(*str);
+		str++;
+	}
+
+	return result;
+}
+```
+
+---
+
+## tolower()
+
+语法: `int tolower(int c)`
+
+作用: 把给定的字母转换为小写字母.
+
+- c -- 这是要被转换为小写的字母.
+
+返回值: 如果`c`有相对应的小写字母，则该函数返回`c`的小写字母，否则`c`保持不变。返回值是一个可被隐式转换为 char 类型的 int 值。
+
+```c
+//需注意str参数不能是常量字符串,否则会报错访问冲突问题 
+char* toLowerCase(char* str)
+{
+	char* result = str;
+	while (*str != '\0')
+	{
+		*str = tolower(*str);
+		str++;
+	}
+
+	return result;
+}
+```
+
+---
+
 # <stddef.h>
 
 ## offsetof()
