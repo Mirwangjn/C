@@ -790,3 +790,87 @@ int main()
 
 
 ![位段的应用](img/位段的应用.png "位段的应用")
+
+---
+
+# 枚举(enum)
+
+```c
+enum Sex
+{
+	FALE,//默认值为0
+	FEMALE,//然后依次递增(在没有修改的情况下) 1
+	SECRET// 2
+};
+
+enum Color
+{
+    RED = 2,//这就相当于为常量赋值一个初始值
+    GREEN = 5,
+    BLUE = 9
+};
+
+enum Boy
+{
+    HANDSOME = 7,
+    UGLY,//因为这个值没有被主动赋值,所以根据上一个值然后自增
+    CUTE = 1,
+};
+
+int main()
+{
+	enum Sex s = FALE;
+	printf("%d %d %d\n", FALE, FEMALE, SECRET);// 0 1 2
+    printf("%d %d %d\n", RED, GREEN, BLUE);// 2 5 9
+    printf("%d %d %d\n", HANDSOME, UGLY, CUTE);// 7 8 1
+    return 0;
+};
+```
+
+> 枚举成员被视为常量。在C语言中，枚举成员是一个具有固定值的常量。当定义枚举类型时，每个枚举成员都被赋予一个特定的值，并且它在整个程序运行过程中保持不变。默认情况下，枚举成员的值从0开始自增。**但是，我们也可以为每个枚举成员显式指定一个值**。如果没有显式指定值，则会按照自增规则依次进行赋值。
+
+---
+
+# 共用体(union)
+
+在C语言中，联合（union）是一种特殊的数据类型，允许在相同的内存位置存储不同类型的数据。联合内的成员共享同一块内存，但每次只能用一个成员来保存数据。联合的大小等于其最大成员的大小。
+
+```c
+union Data {
+	int i;
+	float f;
+	char str[20];
+};
+
+int main()
+{
+    union Data d;
+	d.f = 1.1f;
+	d.i = 1;
+    //共用一块空间
+	printf("%p\n", &d);
+	printf("%p\n", &d.f);
+	printf("%p\n", &d.i);
+    return 0;
+};
+```
+
+![union共用体共用一块空间](img/union共用体共用一块空间.png "union共用体共用一块空间")
+
+## 使用共用体判断大小端
+
+```c
+int check_system()
+{
+	union type
+	{
+		char c;
+		int i;
+	}T;
+	T.i = 1;
+	printf("%d\n", T.c);
+	return T.c;
+}
+```
+
+![共用体判断大小端](img/共用体判断大小端.png "共用体判断大小端")
