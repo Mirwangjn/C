@@ -88,7 +88,132 @@ compare函数指针细节: `int compare(const void *a, const void *b)`
 - 返回值 = 0 表示两个元素相等，它们的相对位置不变
 - 返回值 < 0 表示第一个元素应该排在第二个元素之前
 
-> 具体使用参考
+> [具体使用参考qsort使用](/show_detail/detail.md#qsort的使用)
+
+---
+
+## malloc()
+
+语法: `void* malloc(size_t size)`
+
+作用: 分配所需的内存空间，并返回一个指向它的指针.
+
+- size -- 内存块的大小，以字节为单位.
+
+返回值: 该函数返回一个指针 ，指向已分配大小的内存。如果请求失败(请求内存空间失败)，则返回 NULL
+
+基本使用
+
+```c
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <errno.h>
+int main()
+{
+	int* i = malloc(10 * sizeof(int));
+	if (i == NULL)
+	{
+		printf("%s\n", strerror(errno));
+	}
+	else
+	{
+		int* tmp = i;
+		int j = 0;
+		for (j = 0; j < 10; j++)
+		{
+			*(tmp + j) = j;
+		}
+		for (j = 0; j < 10; j++)
+		{
+			printf("%d ", *(tmp + j));
+		}
+	}       
+    i = NULL;   
+    free(i);//释放内存空间                 
+	return 0;
+}
+```
+
+> [free函数的使用参考`free()`](#free)
+
+```c
+int main()
+{
+    int* i = malloc(INT_MAX + INT_MAX);//INT_MAX为最大的int值
+	if (i == NULL)
+	{
+		printf("%s\n", strerror(errno));// NOT ENOUGH SPACE
+	}
+    return 0;
+}
+```
+
+---
+
+## free()
+
+作用: 释放之前调用`calloc``malloc` 或`realloc`所分配的内存空间
+
+语法: `void free(void *memblock)`
+
+- memblock -- 指针指向一个要释放内存的内存块, 如果传递的参数是一个空指针，则不会执行任何动作。
+
+注意点: 
+
+```c
+int main()
+{
+    int* i = malloc(10 * sizeof(int));
+    /*虽然free释放了空间, 但是i指针的指向还是存在的
+    ,所以如果不释放的话就成了野指针*/
+    i = NULL;
+    free(i);
+    
+    return 0;
+}
+```
+
+![free函数注意点](img/free函数注意点.png "malloc使用后没有设为NULL的情况")
+
+---
+
+## calloc()
+
+作用: 返回一个指向它的指针。`malloc` 和 `calloc` 之间的不同点是，`malloc` 不会设置内存为零，而 `calloc` 会设置分配的内存为零。
+
+语法: `void *calloc(size_t nitems, size_t size)`
+
+- nitems -- 要被分配的元素个数。
+- size -- 元素的大小。
+
+```c
+#include <stdlib.h>
+
+int main()
+{
+	int* malloc_p = malloc(2 * sizeof(int));
+	int* calloc_p = calloc(2, sizeof(int));
+	return 0;
+}
+```
+
+![malloc_p的内存图](img/malloc_p的内存图.png "malloc_p的内存图")
+
+![calloc_p的内存图](img/calloc_p的内存图.png "calloc_p的内存图")
+
+---
+
+## realloc()
+
+作用: 重新调整`malloc`或`calloc`所分配的指针空间的内存大小    
+
+语法: `void *realloc(void *ptr, size_t size)`
+
+- ptr -- 一个指针, 这个指针之前由`malloc`和`calloc`调用; 如果传递参数为空指针(NULL)，则会分配一个新的内存块，且函数返回一个指向它的指针。
+- size -- 为重新分配后的大小(以字节为单位); 如果大小为 0，且 ptr 指向一个已存在的内存块，则 ptr 所指向的内存块会被释放，并返回一个空指针。
+
+> [更多细节参考realloc的注意点](/C语言进阶.md#realloc的使用注意点)
 
 ---
 
@@ -99,6 +224,8 @@ compare函数指针细节: `int compare(const void *a, const void *b)`
 语法:`time_t time(time_t *t);`
 
 时间戳获取: `time(NULL);`
+
+> [使用参考`rand()`](#rand)
 
 ---
 
@@ -130,7 +257,7 @@ compare函数指针细节: `int compare(const void *a, const void *b)`
 - %p - 以地址的形式打印 (每一块内存空间都有着自己的地址)(占位符将会被实际指针的十六进制表示所替代)
 - %x - 打印16进制
 - %zd - 打印size_t类型(为typedef定义的类型实际就是unsigned int)的参数的整数
-- %u - 打印无符号整数(包括负数---负数打印的结果为负数的绝对值与无符号整型的取值范围取模后得到的结果)
+- %u - 打印无符号整数(包括负数---负数打印的结果为负数的绝对值与无符号整型的取值范围取模后得到的结果)9
 - %nd - 输出的整数占n位，不足n位则在前面补空格(n为整数)
 - %-nd - 输出的整数占n位，不足n位则在后面补空格(n为整数)
 - ...
@@ -328,6 +455,17 @@ return value: destination string(目标字符串)
 >
 > [`memcpy`实现方式参考这里](./subject/头文件实现.md#memcpy)
 
+---
+
+## memset()
+
+语法: `void* memset(void *str, int c, size_t n)`
+
+作用: 复制字符 c（一个无符号字符）到参数 str 所指向的字符串的前 n 个字符
+
+- str -- 指向要填充的内存块(字符串)。
+- c -- 要被设置的值。该值以`int`形式传递，但是函数在填充内存块时是使用该值的无符号字符形式。
+- n -- 要被设置为该值的字符数。
 
 ---
 
