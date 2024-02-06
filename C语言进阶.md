@@ -913,6 +913,8 @@ int main()
 
 ![内存使用分配图](img/内存使用分配图.png "内存使用分配图")
 
+![内存图详细](img/内存图详细.png "内存图详细")
+
 ---
 
 ## `malloc`, `free`, `calloc`, `realloc`
@@ -994,3 +996,121 @@ malloc和calloc的区别在于需要传递的参数不同
 ```
 
 > 因为堆区开辟的空间不会因为函数的结束而结束, 只有手动释放内存调用`free`函数 
+
+---
+
+## 柔性数组
+
+通常，C语言中定义数组时，需要指定数组的大小。但柔性数组允许在结构体中定义一个数组，而不指定其大小，使得该数组成为可变长度的。
+
+- 使用柔性数组实现
+
+```c
+typedef struct Student
+{
+	int n;
+	int arr[];//柔性数组
+}Stu;
+
+int main()
+{
+	//printf("%d\n", sizeof(Stu));
+	Stu* s = malloc(sizeof(Stu) + 5 * sizeof(int));
+	int i = 0;
+	s->n = 1;
+	for (i = 0; i < 5; i++)
+	{
+		s->arr[i] = i;
+	}
+	Stu* ptr = realloc(s, sizeof(Stu) + 10 * sizeof(int));
+	if (ptr != NULL)
+	{
+		s = ptr;
+		ptr = NULL;
+	}
+	for (i = 5; i < 10; i++)
+	{
+		s->arr[i] = i;
+	}
+	for (i = 0; i < 10; i++)
+	{
+		printf("%d ", s->arr[i]);
+	}
+	printf("\n");
+	free(s);
+	s = NULL;
+	return 0;
+}
+```
+
+- 使用指针的方式实现
+
+```c
+struct Stu2
+{
+	int n;
+	int* arr;
+};
+
+int main()
+{
+	//开辟空间
+	struct Stu2* s = malloc(sizeof(struct Stu2));
+	s->arr = malloc(5 * sizeof(int));
+	s->n = 2;
+	int i = 0;
+	for (i = 0; i < 5; i++)
+	{
+		s->arr[i] = i;
+	}
+	int* ptr = realloc(s->arr, 10 * sizeof(int));
+	if (ptr != NULL)
+	{
+		s->arr = ptr;
+		ptr = NULL;
+	}
+	for (i = 5; i < 10; i++)
+	{
+		s->arr[i] = i;
+	}
+	for (i = 0; i < 10; i++)
+	{
+		printf("%d ", s->arr[i]);
+	}
+    //如果先释放s, 就无法找到s->arr这块内存区域
+	free(s->arr);
+	s->arr = NULL;
+	free(s);
+	s = NULL;
+	return 0;
+}
+```
+
+> 1. 指针实现对比柔性数组的`free`要更多(free越多,越不好管理),而且还需要注意**释放的先后问题**; 而柔性数组存储时连续的
+> 2. malloc开辟空间, 会导致有的内存区域不大也不小(**内存碎片**); 而连续存储相对来说内存碎片会更少
+>
+> [参考局部性原理](#局部性原理 "局部性原理")
+
+![柔性数组的优点](img/柔性数组的优点.png "柔性数组的优点")
+
+---
+
+### 柔性数组的特点
+
+1. 结构体的柔性数组的成员前面至少有一个其他成员
+2. sizeof返回的结构体大小不包括柔性数组的内存
+3. 包含柔性数组成员的结构使用malloc函数进行动态内存分配, 并且分配的内存大小应该大于结构体大小, 以适应柔性数组的预期大小
+
+---
+
+# 局部性原理
+
+局部性原理（Locality Principle）是计算机科学中的一个重要概念
+，描述了在程序中访问数据的模式。局部性原理指出，当一个程序访问某个数据项时，
+很可能在近期再次访问相邻的数据项，或者在不久的将来访问相邻的数据项。
+这种数据访问的模式可以分为两类：时间局部性和空间局部性。
+
+时间局部性（Temporal Locality）指的是，如果一个数据被访问过一次，那么在不久之后它可能再次被访问。这意味着程序中的循环、迭代和重复操作会导致数据的重复访问。
+
+空间局部性（Spatial Locality）指的是，**如果一个数据被访问，那么在不久之后其附近的数据也可能被访问**。这意味着程序中的数组、指针和数据结构等会导致相关数据的连续访问。
+
