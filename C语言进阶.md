@@ -882,7 +882,7 @@ int check_system()
 
 ## 共用体大小的计算
 
-- 共用体的大小至少是最大成员的大小
+- **共用体的大小至少是最大成员的大小**
 - **当最大成员大小不是最大对齐数的整数倍的时候, 就要对齐到最大对齐数的整数倍**
 
 ```c
@@ -1113,4 +1113,56 @@ int main()
 时间局部性（Temporal Locality）指的是，如果一个数据被访问过一次，那么在不久之后它可能再次被访问。这意味着程序中的循环、迭代和重复操作会导致数据的重复访问。
 
 空间局部性（Spatial Locality）指的是，**如果一个数据被访问，那么在不久之后其附近的数据也可能被访问**。这意味着程序中的数组、指针和数据结构等会导致相关数据的连续访问。
+
+---
+
+# 文件操作
+
+在编程设计中,一般谈的文件有两种: 程序文件, 数据文件
+
+1. 程序文件(例如`.c`后缀名)
+2. 数据文件(文件内容不一定是数据,而是程序运行时的读写数据,例如`.json`)
+
+## 文件类型
+
+数据文件被称为**文本文件**和**二进制文件**. 数据在内存中已二进制的形式存储, 如果不加转换的输出到外存就是二进制文件
+
+## 基本使用
+
+`FILE *fopen( const char *filename, const char *mode )`
+
+```c
+#include <stdio.h>
+#include <string.h>
+#include <errno.h>
+
+int main()
+{
+	FILE* fp = fopen("test.txt", "w");//打开文件
+    if (fp == NULL)
+	{
+		printf(strerror(errno));
+		return 0;
+	}
+	fputs("hello world!", fp);// 写入文件
+	fclose(fp);
+	return 0;
+}
+```
+
+## 输入输出缓冲区关键字`stdin`和`stdout`
+
+```c
+#include <stdio.h>
+int main()
+{
+    char buf[255] = { 0 };
+	fgets(buf, 255, stdin);//在输入缓冲区(键盘)拿数据并赋值给buf
+	fputs(buf, stdout);// 写入buf的内容在输出缓冲区中(屏幕)
+    // scanf("%s", buf);//相当于
+    // printf("%s\n", buf);
+    return 0;
+}
+```
+
 

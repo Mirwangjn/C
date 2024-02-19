@@ -264,6 +264,395 @@ int main()
 
 ---
 
+## fclose()
+
+作用: 关闭流(stream)。刷新所有的缓冲区
+
+语法: `int fclose(FILE *stream)`
+
+- stream -- FILE对象的指针(FILE*)，该FILE对象指定了要被关闭的流。
+
+返回值: 如果流成功关闭，则该方法返回`0`。如果失败，则返回`EOF`(end of file)。
+
+```c
+#include <stdio.h>
+int main()
+{
+    /* 1. 如果没有test.txt,则会新建名为test.txt的文件,然后写入 
+       2. "w"模式会覆盖原先的内容
+    */
+
+    FILE* pc = fopen("test.txt", "w");
+    fputs("handsome", pc);
+    fclose(pc);
+    return 0;
+};
+```
+
+---
+
+## fopen()
+
+作用: 使用给定的模式`mode`打开`filename`所指向的文件
+
+声明: `FILE *fopen(const char *filename, const char *mode)`
+
+- filename -- 要打开的文件名或路径
+- mode -- 字符串，表示文件的访问模式，可以是以下表格中的值：
+
+模式: 
+
+1. `"r"` -- 打开一个用于读取的文件。该文件必须存在。
+2. `"w"` -- 创建一个用于写入的空文件。如果文件名称与已存在的文件相同，则会删除已有文件的内容，文件被视为一个新的空文件。如果文件不存在，则创建文件。
+3. `"a"` -- 追加到一个文件。写操作向文件末尾追加数据。如果文件不存在，则创建文件。
+4. `"r+"` -- 打开一个用于更新的文件，可读取也可写入。该文件必须存在。
+5. `"w+"` -- 创建一个用于读写的空文件。
+6. `"a+"` -- 打开一个用于读取和追加的文件。
+
+返回值: 该函数返回一个`FILE`指针。否则返回`NULL`且设置全局变量`errno`来标识错误
+
+```c
+#define _CRT_SECURE_NO_WARNINGS 1;
+#include <stdio.h>
+#include <string.h>
+#include <errno.h>
+int main()
+{
+    FILE* p = fopen("D:\\c语言学习\\file_operate\\file_operate\\test.txt", "r");//打开文件
+    if (p == NULL)
+	{
+		printf(strerror(errno));
+        return 1;
+	}
+	char ch[255];
+    fgets(ch, 255, (FILE*)p);//读数据, 文件
+    printf(ch);//打印
+    fclose(p);//释放缓冲区
+    p = NULL;
+    return 0;
+}
+```
+
+---
+
+## fputs()
+
+作用: 把字符串写入到指定的流`stream`中, 但不包括空字符。
+
+声明: `int fputs(const char *str, FILE *stream)`
+
+- str -- 一个字符数组
+- stream -- 这是指向`FILE`对象的指针，该`FILE`对象标识了要被**写入字符串**的流。
+
+返回值: 该函数返回一个非负值，如果发生错误则返回`EOF`
+
+```c
+#define _CRT_SECURE_NO_WARNINGS 1;
+#include <string.h>
+#include <stdio.h>
+#include <errno.h>
+int main()
+{
+	FILE* fp = fopen("test.txt", "w+");//打开文件,进行读写模式
+    //当指针为指针时
+	if (fp == NULL)
+	{
+		printf("%s\n", strerror(errno));
+		return 1;
+	}
+	fputs("woshidashuaibi", fp);//写入
+	fclose(fp);//关闭stream
+	fp = NULL;
+	return 0;
+}
+```
+
+> [关于`fopen`的模式参考这里](#fopen)
+>
+> [使用格式化写入参考这里]()
+
+---
+
+## fputc()
+
+作用: 把参数 char 指定的字（一个无符号字符写入到指定的流 stream 中，**并把位置标识符往前移动**(stream读数据后位置会改变,如果需要重新读,则使用`fseek()`改变偏移值)。
+
+声明: `int fputc(int char, FILE *stream)`
+
+- char -- 这是要被写入的字符。该字符以其对应的`int`值进行传递。
+- stream -- 这是指向 `FILE` 对象的指针，该 `FILE` 对象标识了要被写入字符的流。
+
+返回值: 如果没有发生错误，则返回**被写入的字符**。如果发生错误，则返回 EOF，并设置错误标识符(errno)。
+
+```c
+int main()
+{
+	FILE* fp = fopen("test.txt", "w+");
+	if (fp == NULL)
+	{
+		printf("%s\n", strerror(errno));
+		return 1;
+	}
+	fputc('w', fp);
+	fputc('a', fp);
+	fputc('n', fp);
+	fputc('g', fp);
+	fclose(fp);
+	fp = NULL;
+	return 0;
+}
+```
+
+---
+
+## fgets()
+
+作用: 从指定的流`stream`读取一行,并把它存储在`str`所指向的字符串内。当读取到`(n-1)`个字符时，**或者读取到换行符(空格不会停止)时，或者到达文件末尾时，它会停止，具体视情况而定。**
+
+注意: 当读取到n-1个字符时会在第n的位置补`'\0'`
+ 
+声明: `char *fgets(char *str, int n, FILE *stream)`
+
+- str -- 这是指向一个字符数组的指针，该数组存储了要读取的字符串。
+- n -- 这是要读取的最大字符数（包括最后的空字符`'\0'`）。通常是使用以 str 传递的数组长度。
+- stream -- 这是指向 FILE 对象的指针，该 FILE 对象标识了要从中读取字符的流。
+
+返回值: 如果成功，**该函数返回相同的 str 参数**。如果到达文件末尾或者没有读取到任何字符，str 的内容保持不变，并返回`NULL `。
+
+如果发生错误，返回一个空指针。
+
+```c
+int main()
+{
+	char arr[] = "wangjianian";//12
+	char tmp[30] = { 0 };
+	FILE* pf = fopen("test.txt", "w");
+	if (pf == NULL)
+		return 1;
+	fwrite(arr, 1, 11, pf);//写入时不管'\0'
+	fclose(pf);
+	pf = NULL;
+	//重新选择模式
+	pf = fopen("test.txt", "r");
+	fgets(tmp,11 , pf);//读时需要把'\0'算进去
+	fclose(pf);
+	pf = NULL;
+	return 0;
+}
+```
+
+---
+
+## fgetc()
+
+声明: `int fgetc(FILE* stream)`
+
+作用: 从指定的流 stream 获取下一个字符（一个无符号字符），并把位置标识符往前移动。
+
+- stream -- 为FILE对象指向的指针, 该 FILE 对象标识了要从中读取字符的流。
+
+返回值: 该函数以无符号 char 强制转换为 int 的形式**返回读取的字符**，如果到达文件末尾或发生读错误，则返回 `EOF`。
+
+---
+
+## fwrite()
+
+声明: `size_t fwrite(const void *ptr, size_t size, size_t count, FILE *stream)`
+
+作用: 把 `ptr` 所指向的数组中的数据写入到给定流 `stream` 中。
+
+- ptr -- 这是指向要被写入的元素数组的指针。
+- size -- 这是要被写入的每个元素的大小，以字节为单位(每个元素的大小)。
+- count -- 这是元素的个数，每个元素的大小为 size 字节(元素的个数)。
+- stream -- 这是指向 FILE 对象的指针，该 FILE 对象指定了一个输出流。
+
+返回值: 如果成功，该函数返回一个 size_t 对象，表示元素的总数，该对象是一个整型数据类型。如果该数字与 `count` 参数不同，则会显示一个错误。
+
+```c
+int main()
+{
+	S s = { 20, "wangjianian" };
+	S s1 = { 0 };
+	FILE* pf = fopen("test.txt", "wb");
+	fwrite(&s, sizeof(S), 1, pf);
+	fclose(pf);
+
+	pf = fopen("test.txt", "rb");
+	fread(&s1, sizeof(S), 1, pf);
+	fclose(pf);
+	return 0;
+}
+```
+
+---
+
+## fread()
+
+作用: 从给定流 stream 读取数据到 ptr 所指向的数组中。
+
+声明: `size_t fread(void *ptr, size_t size, size_t nmemb, FILE *stream)`
+
+- ptr -- 这是指向带有最小尺寸 size*nmemb 字节的内存块的指针。
+- size -- 这是要读取的每个元素的大小，以字节为单位。
+- nmemb -- 这是元素的个数，每个元素的大小为 size 字节。
+- stream -- 这是指向 FILE 对象的指针，该 FILE 对象指定了一个输入流。
+
+返回值: 成功读取的元素总数会以 size_t 对象返回，size_t 对象是一个整型数据类型。如果总数与 nmemb 参数不同，则可能发生了一个错误或者到达了文件末尾。
+
+---
+
+## fseek()
+
+声明: `int fseek(FILE *stream, long offset, int origin)`
+
+- stream -- 这是指向 FILE 对象的指针，该 FILE 对象标识了流。
+- offset -- 这是相对 origin 的偏移量，以字节为单位。
+- origin -- 这是表示开始添加偏移 offset 的位置。它一般指定为下列常量之一：
+
+1. `SEEK_SET` ==> 文件的开头(seek_set)
+2. `SEEK_CUR` ==> 文件指针的当前位置(seek_current)
+3. `SEEK_END` ==> 文件的末尾(seek_end)
+
+```c
+#include <stdio.h>
+int main()
+{
+	FILE* pf = fopen("test.txt", "r");
+	char arr[20] = { 0 };
+	fseek(pf, 2, SEEK_CUR);//当前位置偏移两位
+	//从前往后读
+	fgets(arr, 8, pf);//需把'\0'算进去
+	fclose(pf);
+	pf = NULL;
+	return 0;
+}
+```
+
+---
+
+## ftell()
+
+作用: 计算当前位置偏移量与起始位置的距离, 返回值为`long int`
+
+声明: `long int ftell(FILE *stream)`
+
+- stream -- 这是指向 FILE 对象的指针，该 FILE 对象标识了流。
+
+返回值: 该函数返回位置标识符的当前值。如果发生错误，则返回 `-1L`，全局变量 `errno` 被设置为一个正值。
+
+```c
+#include <stdio.h>
+//test.txt ===> 123456789
+int main()
+{
+	FILE* pf = fopen("test.txt", "r");
+	fseek(pf, -2, SEEK_END);
+	int len = ftell(pf);// 7
+	fclose(pf);
+	pf = NULL;
+	return 0;
+};
+```
+
+---
+
+## rewind()
+
+作用: 让文件指针位置回到文件的起始位置
+
+声明: `void rewind(FILE *stream)`
+
+- stream -- 这是指向 FILE 对象的指针，该 FILE 对象标识了流。
+
+返回值: 无返回值
+ 
+```c
+#include <stdio.h>
+//test.txt ===> 123456789
+int main()
+{
+	FILE* pf = fopen("test.txt", "r");
+	char ch = fgetc(pf);
+	printf("%c\n", ch);// 1
+	rewind(pf);// 回到文件的起始位置
+	ch = fgetc(pf);
+	printf("%c\n", ch);// 1
+	fclose(pf);
+	pf = NULL;
+	return 0;
+}
+```
+
+---
+
+## feof()
+
+作用: 当文件结束时(已经知道结束了), 判断文件是读取失败而结束, 还是遇到文件结尾而结束
+
+注意: 在文件读取过程中, 不能用`feof`函数的返回值来判断文件是否结束; 而是应用于当文件结束时(已经知道结束了), 判断文件是读取失败而结束, 还是遇到文件结尾而结束
+
+声明: `int feof(FILE *stream)`
+
+返回值: 遇到文件结尾而结束时返回**非零值**, 否则返回零
+
+```c
+#include <stdio.h>
+//test.txt ===> 123456789
+int main()
+{
+	FILE* pf = fopen("test.txt", "r");
+	char c;
+	while ((c = fgetc(pf)) != EOF)
+	{
+		putchar(c);
+	}
+
+	if (feof(pf))
+	{
+		printf("end of file");//当文件正常读到结尾时
+	}
+	return 0;
+}
+```
+
+---
+
+## perror()
+
+作用: 把一个描述性错误消息输出到标准错误`stderr`(自己抛错误)
+
+声明: `void perror(const char *str)`
+
+```c
+#include <stdio.h>
+int main()
+{
+	FILE* pf = fopen("test/txt", "r");//特意制造错误
+	if(pf == NULL)
+	{
+		perror("错误");//错误: No such file or directory
+		// perror("无错误时");// 无错误时: No error
+		return -1;
+	}
+	return 0;
+}
+```
+
+---
+
+## rename()
+
+作用: 给指向的文件重命名
+
+声明: `int rename(const char *old_filename, const char *new_filename)`
+
+- old_filename -- 旧名字
+- new_filename -- 新名字
+
+返回值: 如果成功，则返回`0`. 如果错误，则返回`-1`，并设置`errno`
+
+---
+
 # <string.h>
 
 ## strlen()
