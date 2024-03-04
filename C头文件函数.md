@@ -155,7 +155,7 @@ int main()
 
 作用: 释放之前调用`calloc``malloc` 或`realloc`所分配的内存空间
 
-语法: `void free(void *memblock)`
+语法: `void free(void *memblock)`1
 
 - memblock -- 指针指向一个要释放内存的内存块, 如果传递的参数是一个空指针，则不会执行任何动作。
 
@@ -309,7 +309,14 @@ int main()
 5. `"w+"` -- 创建一个用于读写的空文件。
 6. `"a+"` -- 打开一个用于读取和追加的文件。
 
+如果处理的是二进制文件，则需使用下面的访问模式来取代上面的访问模式：
+
+`"rb"`, `"wb"`, `"ab"`, `"rb+"`, `"r+b"`, `"wb+"`, `"w+b"`, `"ab+"`, `"a+b"`
+
 返回值: 该函数返回一个`FILE`指针。否则返回`NULL`且设置全局变量`errno`来标识错误
+
+> `文件指针`与`位置指针`: 文件指针指向内存中的文件信息区的开头, 其位置不会改变; 而位置
+> 指针会通过文件的读写而不断改变.
 
 ```c
 #define _CRT_SECURE_NO_WARNINGS 1;
@@ -368,8 +375,6 @@ int main()
 ```
 
 > [关于`fopen`的模式参考这里](#fopen)
->
-> [使用格式化写入参考这里]()
 
 ---
 
@@ -417,7 +422,7 @@ int main()
 - n -- 这是要读取的最大字符数（包括最后的空字符`'\0'`）。通常是使用以 str 传递的数组长度。
 - stream -- 这是指向 FILE 对象的指针，该 FILE 对象标识了要从中读取字符的流。
 
-返回值: 如果成功，**该函数返回相同的 str 参数**。如果到达文件末尾或者没有读取到任何字符，str 的内容保持不变，并返回`NULL `。
+返回值: 如果成功，**该函数返回相同的 str 参数**。如果到达文件末尾或者没有读取到任何字符，str 的内容保持不变，并返回`NULL`。
 
 如果发生错误，返回一个空指针。
 
@@ -435,6 +440,7 @@ int main()
 	//重新选择模式
 	pf = fopen("test.txt", "r");
 	fgets(tmp,11 , pf);//读时需要把'\0'算进去
+	//这时 temp = "wangjiania"
 	fclose(pf);
 	pf = NULL;
 	return 0;
@@ -466,9 +472,15 @@ int main()
 - count -- 这是元素的个数，每个元素的大小为 size 字节(元素的个数)。
 - stream -- 这是指向 FILE 对象的指针，该 FILE 对象指定了一个输出流。
 
-返回值: 如果成功，该函数返回一个 size_t 对象，表示元素的总数，该对象是一个整型数据类型。如果该数字与 `count` 参数不同，则会显示一个错误。
+返回值: 如果成功，该函数返回一个 **`size_t` 对象，表示元素的总数**，该对象是一个整型数据类型。如果该数字与 `count` 参数不同，则会显示一个错误。
 
 ```c
+typedef struct S
+{
+	int age;
+	char name[20];
+}S;
+
 int main()
 {
 	S s = { 20, "wangjianian" };
@@ -512,6 +524,8 @@ int main()
 1. `SEEK_SET` ==> 文件的开头(seek_set)
 2. `SEEK_CUR` ==> 文件指针的当前位置(seek_current)
 3. `SEEK_END` ==> 文件的末尾(seek_end)
+
+![fseek的偏移方式](img/fseek的偏移方式.png "fseek的偏移方式")
 
 ```c
 #include <stdio.h>
@@ -593,7 +607,7 @@ int main()
 
 声明: `int feof(FILE *stream)`
 
-返回值: 遇到文件结尾而结束时返回**非零值**, 否则返回零
+返回值: 遇到文件结尾而结束时返回**非零值**, 否则返回`0`
 
 ```c
 #include <stdio.h>
@@ -640,7 +654,58 @@ int main()
 
 ---
 
-## rename()
+## clearerr()
+
+作用: 清除给定流 stream 的文件结束和错误标识符
+
+声明: `void clearerr(FILE *stream)`
+
+- stream -- `FILE*`指针
+
+返回值: 这不会失败，且不会设置外部变量 `errno`，但是如果它检测到它的参数不是一个有效的流，则返回`-1`，并设置 `errno` 为 `EBADF`
+
+---
+
+## ferror()
+
+作用: 检查目标文件是否存在错误的"文件操作"
+
+声明: `int ferror(FILE *stream)`
+
+- stream -- `FILE*`指针
+
+返回值: 如果设置了错误标识符, 则返回`非零值`, 否则返回`0`
+
+```c
+int main()
+{
+    FILE* fp;
+    char c;
+    int err;
+
+    fp = fopen("file.txt", "w");
+	// 读操作(r),而打开的流的方式为"w". 
+    c = fgetc(fp);
+    if (err = ferror(fp))
+    {
+        printf("读取文件：file.txt 时发生错误\n");
+    }
+    clearerr(fp);
+    if (ferror(fp))
+    {
+        printf("读取文件：file.txt 时发生错误\n");
+    }
+    fclose(fp);
+
+    return(0);
+}
+```
+
+假设我们有一个文本文件`file.txt`，它是一个空文件。当运行并编译时, 因为我们试图读取一个以只写模式打开的文件. 结果是:`读取文件：file.txt 时发生错误`
+
+---
+
+<!-- ## rename()
 
 作用: 给指向的文件重命名
 
@@ -651,7 +716,7 @@ int main()
 
 返回值: 如果成功，则返回`0`. 如果错误，则返回`-1`，并设置`errno`
 
----
+--- -->
 
 # <string.h>
 
@@ -832,7 +897,7 @@ return value: destination string(目标字符串)
 
 语法: `void* memcpy(void* dest, const void* src, size_t num)`
 
-作用: 在内存中将`src`的数据copy到dest中
+作用: 在内存中将`src`的数据copy到`dest`中
 
 - dest -- 用于存储复制内容的目标数组
 - src -- 复制的数据源
