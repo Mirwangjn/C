@@ -780,6 +780,36 @@ int main()
 
 ---
 
+### 不带参数的位段
+
+```c
+struct STU
+{
+	int a : 12;
+	int b : 12;
+    //位段后不带:的, 代表它占位一整个int也就是32字节
+	int c;
+	int d : 2;
+};
+
+struct STU1
+{
+	char a : 4;
+	char b : 2;
+	char c;
+	char d : 1;
+};
+ 
+int main()
+{
+	printf("%d\n",sizeof(struct STU));// 8
+    printf("%d\n",sizeof(struct STU1));// 3
+	return 0;
+}
+```
+
+---
+
 ## 位段的跨平台问题
 
 1. int位段被当成有符号还是无符号数是不确定的(C语言标准没有给出回答,所以每一个编译器都不一样)
@@ -1164,5 +1194,415 @@ int main()
     return 0;
 }
 ```
+                                           
+---
+
+# 预处理
+
+章节涉及:
+1. 程序的翻译环境
+2. 程序的执行环境
+3. 编译和链接
+4. 预处理指令`#define`
+5. 宏和函数的对比
+
+![源文件转换为可执行程序的过程](img/源文件转换为可执行程序的过程.png "源文件转换为可执行程序的过程")
+
+## 程序的翻译环境和执行环境
+
+`将xxx.c`翻译成`xxx.exe`的过程
+
+在这个**翻译环境**中源代码(.c)会被转换为可执行的机器指令(二进制01); 而**执行环境**用于实际执行代码 
+
+![翻译过程](img/翻译过程.png "翻译过程")
+
+### 符号汇总和形成符号表
+
+#### 符号汇总
+
+```c
+// test2.c
+int add(int x, int y)
+{
+	return x + y;
+}
+```
+
+> `test2.c`文件中`add`函数在编译过程中会形成一个符号地址
+
+```c
+// test1.c
+#include <stdio.h>
+/*这些话只是一个声明, 在运行时之所以可以使用是因为
+经历了链接过程符号表的合并*/
+extern int add(int x, int y);
+
+int main()
+{
+	int a = 20;
+	int b = 30;
+    
+	int c = add(a, b);
+	printf("%d\n", c);
+	return 0;
+}
+```
+
+> `test1.c`文件中`main`函数就是一个符号
+
+#### 形成符号表
+
+在汇编阶段会生成符号表, 将符号和它的地址发在表中
+
+---
+
+## 预定义符号
+
+1. `__FILE__`当前文件路径
+2. `__LINE__`当前代码行号
+3. `__DATE__`当前月日年
+4. `__TIME__`当前时间
+5. `__FUNCTION__`查看当前函数名 
+
+```c
+#include <stdio.h>
+
+int main()
+{
+	printf("%s\n", __FILE__);// D:\c语言学习\预处理\预处理\test.c
+	printf("%d\n", __LINE__);// 13
+	printf("%s\n", __DATE__);// Mar 12 2024
+	printf("%s\n", __TIME__);// 15:33:23
+	return 0;
+}
+```                                                                      
+
+---
+
+## `#define`宏
+
+### `#define`后面加分号
+
+```c
+#define MAX 100;
+int main()
+{
+    int a = MAX;// 相当于 int a = 100;;
+    int b = MAX// 相当于 int b = 100;
+    return 0;
+}
+```
+
+---
+
+### 宏替换
+
+```c
+#define MULTI(x) x * x 
+#define DOUBLE(x) x + x
+#include <stdio.h>
+int main()
+{
+    //这里就相当于 int result1 = x * x = 5 * 5 = 25
+    int result1 = MULTI(5);
+    printf("%d\n", result1);// 25
+
+    //这里就相当于 int result2 = x * x = 5 + 1 * 5 + 1 = 11
+    int result2 = MULTI(5 + 1);
+    printf("%d\n", result2);// 11
+
+    // int result3 = 10 * 5 + 5 = 55
+    int result3 = 10 * DOUBLE(5);
+    printf("%d\n", result3);// 55
+    return 0;
+}
+```
+
+```c
+//正确使用
+#define MULTI(x) ((x) * (x)) 
+#define DOUBLE(x) ((x) + (x))
+#include <stdio.h>
+int main()
+{
+    //这里就相当于 int result2 = x * x = ((5 + 1) * (5 + 1)) = 11
+    int result2 = MULTI(5 + 1);
+    printf("%d\n", result2);// 36
+
+    //int result3 = 10 * ((5) + (5))
+    int result3 = 10 * DOUBLE(5);
+    printf("%d\n", result3);// 100
+    return 0;
+}
+```
+
+> 在使用宏定义时, 有参数的情况下最好给参数加小括号, **因为宏只会替换而不会进行运算**
+
+---
+
+### #define替换规则
+
+当`#define`定义符号和宏时, 需要设计几个步骤
+
+1. 调用宏时, 首先对参数进行检查, 查看是否包含任何由`#define`定义的符号,如果是则它们首先被替换
+2. 替换文本随后被插入到程序原来的位置.
+3. 最后扫描,看是否还存在`#define`定义的符号, 如果有, 这重复上述
+
+注意:
+
+1. 宏参数和`#define`定义中可以出现其他由`#define`定义的常量, 但对于宏不能出现递归 
+2. 当预处理器搜索`#define`定义的符号的时候, 字符串常量的内容不会被替换
+
+```c
+#include <stdio.h>
+#define MAX 100
+#define MIN 1
+#define ADD(x, y) ((x) + (y))
+
+int main()
+{
+    //在调用宏时, 会优先处理它的参数 ===> ADD(100, 1)
+	int i = ADD(MAX, MIN);
+	printf("%d\n", i);
+    //字符串常量的内容不会被替换
+    printf("MAX = %d\n", MAX);
+	return 0;
+}
+```
+
+---    
+
+## `#`和`##`
+
+`#`在宏`#define`中使用, 作用是:将实参的变量名转换为字符串
+
+```c
+#define print(x) printf("value of "#x" is %d\n", x);
+
+int main()
+{
+	int a = 10;
+	print(a);// value of a is 10
+    printf("hello world");// hello world
+    //C语言中的连续字符串文字（即没有运算符或分隔符分开的字符串）会自动连接在一起。
+    printf("hello ""world");// hello world 
+	return 0;
+}
+```
+
+### 宏的注意点
+
+```c
+#include <stdio.h>
+
+#define MAX(X, Y) (((X) > (Y)) ? (X) : (Y))
+
+int main()
+{
+	int a = 10;
+	int b = 11;
+	//宏并不会进行运算,而是直接替换 ===> (((a++) > (b++)) ? (a++) : (b++))
+	printf("%d\n", MAX(a++, b++));// 12
+	printf("%d\n", a);// 11
+	printf("%d\n", b);// 13
+	return  0;
+}
+```
+
+> 宏最好不要使用带有副作用的参数, 例如: `++`, `--`
+
+---
+
+## 预定义符号`#undef`
+
+`#undef`是一个预处理器指令，用于**取消宏定义**。当使用`#define`定义一个宏时，使用`#undef`可以从预处理器的符号表中删除该宏定义。
+
+```c
+#define MIN 1
+
+int main()
+{
+	printf("%d\n", MIN);
+    //作用是取消宏定义
+#undef MIN
+	printf("%d\n", MIN);// 报错未定义标识符 "MIN"
+	return  0;
+}
+```
+
+---
+
+## 预定义符号`#ifdef`与`#ifndef`
+
+### `#ifdef`
+
+`#endif`为结束标志
+
+```c
+#define DEBUG
+
+int main()
+{
+    //如果DEBUG被定义则执行下列语句
+#ifdef DEBUG
+	printf("wangjianian");
+#endif 
+
+	return  0;
+}
+```
+
+> 如果`DEBUG`**被宏定义**则会执行`#ifdef`和`#endif`的语句
+
+---
+
+### `#ifndef`
+
+作用与`#ifdef`相反
+
+```c
+int main()
+{
+    //DEBUG宏没有被定义就执行下列语句
+#ifndef DEBUG                                       
+    printf("111");
+#endif // !DEBUG
+
+    return 0;
+}
+```
+
+`#ifndef`经常使用在头文件中, 避免重复引用
+
+```c
+// 如果__AVOID_REPEART__被宏定义则不执行被包含的语句
+#ifndef __AVOID_REPEART__
+#define __AVOID_REPEART__
+// 头文件声明...
+int add(int x, int y);
+#endif //当重复引用头文件时, __AVOID_REPEART__已经被定义了, 所以不再执行被包含的内容
+```
+
+现在使用更多的是这种方式
+
+```c
+#pragma once
+int add(int x, int y);
+// 头文件声明...
+```
+
+> `#pragma once`在老的编译器下可能编译不过去
+
+---
 
 
+## `#if defined()`
+
+作用上相当于`ifdef`
+
+```c
+#define DEBUG
+
+int main()
+{
+    ////宏定义了会执行下列代码
+#if defined(DEBUG)
+    printf("111");// 定义了宏所以这句话会执行
+#endif
+    return 0;
+}
+```
+
+> 如果`DEBUG`被宏定义则执行被包含的语句
+
+如果想要表达没有定义一个宏就直接被包含的语句的话可使用`#if !defined`
+
+```c
+#define DEBUG
+
+int main()
+{
+    //宏没定义会执行下列代码
+#if !defined(DEBUG)
+    printf("111");// 已经定义了宏所以这句话不执行
+#endif
+    return 0;
+}
+```
+ 
+---
+
+## 预定义符号`#if`
+
+`#if`后的常量表达式为真则执行被包含的语句
+
+语法格式:
+
+```c
+#if 常量表达式    ----> 0为加, 非0为真
+
+#endif // 0
+``` 
+
+```c
+#include <stdio.h>
+
+int main()
+{
+#if 9 // 9为真则执行被包裹的语句
+	printf("wang");
+#endif
+    return 0;
+}
+```
+
+---
+
+## 多个分支的条件编译
+
+```c
+#if constant-expression
+    // 如果常量表达式为真，则编译下面的代码
+    // ...
+#elif constant-expression
+    // 如果前面的条件为假，并且当前的常量表达式为真，则编译下面的代码
+    // ...
+#else
+    // 如果前面的条件都为假，则编译下面的代码
+    // ...
+#endif // 结束标志
+```
+
+```c
+#include <stdio.h>
+int main()
+{
+#if 1 == 1
+    printf("我是第一条件为真");
+#elif 2 == 2
+    printf("我是第二条件为真")
+#else
+    printf("我是第三条件为真")
+#endif
+//result: 我是第一条件为真
+    return 0;
+}
+```
+
+---
+
+## 文件包含
+
+## #include查找方式""和<>的区别
+
+```c
+//使用<>引头文件会直接在标准路径下查找目标头文件
+#include <stdio.h>
+//#include "stdio.h" // 效率会低一些
+
+/* 查找策略: 现在源文件所以目录下查找. 如果没找到, 编译器就像查找库函数头文件一样
+    在标准位置查找头文件, 再找到就提示编译错误 */ 
+#include "stdlib.h"
+```
+
+> 我的电脑的标准路径: `D:\Windows Kits\10\Include`

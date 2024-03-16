@@ -231,20 +231,47 @@ int main()
 
 # <stdio.h>
 
-## `scanf`细节
+## scanf()
+
+作用: 从标准输入流`stdin`读取格式化输入
+
+声明: `int scanf(const char *format, ...)`
+
+返回值: 如果成功，该函数返回成功匹配和赋值的个数。如果到达文件末尾或发生读错误，则返回 `EOF`
+
+```c
+#include <stdio.h>
+int main()
+{
+	int a, b, c;
+	c = scanf("%d %d", &a, &b);
+	printf("%d\n", c);//2 正常输入的情况下
+	return 0;
+}
+```
+
+### 使用细节
 
 > 在输入时格式需要注意，在输入中需要对应
 
 ```c
-    //在输入时应写--- 1#2#3
+    //在可执行程序中输入时应写--- 1#2#3
     scanf("%d#%d#%d", &i, &z, &y);
-    //在输入时应写--- 1 2 3
+    //在可执行程序中输入时应写--- 1 2 3
     scanf("%d %d %d", &i, &z, &y);
 ```
 
 ---
 
 ## printf打印格式
+
+作用: 格式化输出到标准输出流`stdout`
+
+声明: `int fprintf(FILE *stream, const char *format, ...)`
+
+声明: `printf("<格式化字符串>", <格式参数>);`
+
+返回值: 如果成功，则返回**格式化字符串的大小**，否则返回一个负数。
 
 > 打印字符格式的数据
 
@@ -458,6 +485,48 @@ int main()
 - stream -- 为FILE对象指向的指针, 该 FILE 对象标识了要从中读取字符的流。
 
 返回值: 该函数以无符号 char 强制转换为 int 的形式**返回读取的字符**，如果到达文件末尾或发生读错误，则返回 `EOF`。
+
+---
+
+## fprintf()
+
+作用: 格式化输出到`stream`文件指针中
+
+声明: `int fprintf(FILE *stream, const char *format, ...)`
+
+- stream -- 文件指针
+- format -- 与`printf`一样
+
+返回值: 如果成功，则返回写入的字符总数，否则返回一个负数。
+
+```c
+//记录日志
+int main()
+{
+	FILE* pf = fopen("log.txt", "w");
+	int arr[10] = { 0 };
+	for (int i = 0; i < 10; i++)
+	{
+		arr[i] = i;
+		fprintf(pf, "date: %s -- time: %s\n", __DATE__, __TIME__);
+	}
+
+	return 0;
+}
+```
+
+---
+
+## fscanf()
+
+作用: 从文件流 `stream` 读取格式化输入。
+
+声明: `int fscanf(FILE *stream, const char *format, ...)`
+
+- stream -- 文件指针
+- format -- 与`scanf`一样
+
+返回值: 返回值: 如果成功，该函数返回成功匹配和赋值的个数。如果到达文件末尾或发生读错误，则返回 `EOF`
 
 ---
 
@@ -1070,7 +1139,7 @@ char* toLowerCase(char* str)
 
 ## offsetof()
 
-语法: `offsetof(structName, memberName)`
+语法: `size_t offsetof(structName, memberName)`
 
 作用: 计算结构成员相对于结构体开头的字节偏移量
 
@@ -1093,6 +1162,31 @@ int main()
 {
 	struct S1 s1 = { 0 };
 	printf("%zd\n", offsetof(struct S1, d));// 8
+	return 0;
+}
+```
+
+---
+
+### 使用宏实现offsetof()
+
+```c
+struct STU
+{
+	char c1;
+	int a;
+	char c2;
+};
+/* 先将0转换为struct_name*类型 ===> (struct_name*)0
+然后令其找到需要查找的成员mumber_name  ===> ((struct_name*)0)->mumber_name
+*/
+#define OFFSETOF(struct_name, mumber_name) (int)&(((struct_name*)0)->mumber_name)
+
+int main()
+{
+	printf("%d\n", OFFSETOF(struct STU, c1));
+	printf("%d\n", OFFSETOF(struct STU, a));
+	printf("%d\n", OFFSETOF(struct STU, c2));
 	return 0;
 }
 ```
