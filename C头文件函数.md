@@ -100,7 +100,7 @@ compare函数指针细节: `int compare(const void *a, const void *b)`
 
 - size -- 内存块的大小，以字节为单位.
 
-返回值: 该函数返回一个指针 ，指向已分配大小的内存。如果请求失败(请求内存空间失败)，则返回 NULL
+返回值: 该函数返回一个指针 ，指向已分配大小的内存。如果请求失败(请求内存空间失败)，则返回 `NULL`
 
 基本使用
 
@@ -155,9 +155,9 @@ int main()
 
 作用: 释放之前调用`calloc``malloc` 或`realloc`所分配的内存空间
 
-语法: `void free(void *memblock)`1
+语法: `void free(void *memblock)`
 
-- memblock -- 指针指向一个要释放内存的内存块, 如果传递的参数是一个空指针，则不会执行任何动作。
+- memblock -- 指针指向一个要释放内存的内存块, 如果传递的参数是`NULL`，则不会执行任何动作。
 
 注意点: 
 
@@ -180,7 +180,7 @@ int main()
 
 ## calloc()
 
-作用: 返回一个指向它的指针。`malloc` 和 `calloc` 之间的不同点是，`malloc` 不会设置内存为零，而 `calloc` 会设置分配的内存为零。
+作用: 返回一个指向它的指针。`malloc` 和 `calloc` 之间的不同点是，`malloc` 不会设置内存为零，而 `calloc` 会设置分配的内存为`0`.
 
 语法: `void *calloc(size_t nitems, size_t size)`
 
@@ -526,7 +526,7 @@ int main()
 - stream -- 文件指针
 - format -- 与`scanf`一样
 
-返回值: 返回值: 如果成功，该函数返回成功匹配和赋值的个数。如果到达文件末尾或发生读错误，则返回 `EOF`
+返回值: 如果成功，该函数返回成功匹配和赋值的个数。如果到达文件末尾或发生读错误，则返回 `EOF`
 
 ---
 
