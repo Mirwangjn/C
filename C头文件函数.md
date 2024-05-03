@@ -217,6 +217,20 @@ int main()
 
 ---
 
+## abs()
+
+作用: 返回整数`x`的绝对值
+
+声明: `int abs(int x)`
+
+- x -- 要计算绝对值的整数。
+
+返回值: 如果`x`为正, 则返回`x`; 为负则返回它的相反数`-x`; 为0返回0
+
+> `abs()`函数只适用于整数，如果需要计算浮点数的绝对值，需要使用头文件为<math.h>的 `fabs()` 函数。
+
+---
+
 # <time.h>
 
 ## time()
@@ -443,7 +457,7 @@ int main()
 
 注意: 当读取到n-1个字符时会在第n的位置补`'\0'`
  
-声明: `char *fgets(char *str, int n, FILE *stream)`
+声明: `char* fgets(char *str, int n, FILE *stream)`
 
 - str -- 这是指向一个字符数组的指针，该数组存储了要读取的字符串。
 - n -- 这是要读取的最大字符数（包括最后的空字符`'\0'`）。通常是使用以 str 传递的数组长度。
@@ -456,7 +470,7 @@ int main()
 ```c
 int main()
 {
-	char arr[] = "wangjianian";//12
+	char arr[] = "wangjianian";//长度12, 因为包括'\0'
 	char tmp[30] = { 0 };
 	FILE* pf = fopen("test.txt", "w");
 	if (pf == NULL)
@@ -528,6 +542,54 @@ int main()
 
 返回值: 如果成功，该函数返回成功匹配和赋值的个数。如果到达文件末尾或发生读错误，则返回 `EOF`
 
+```c
+/* 打印矩阵, 并存储在test.dat文件中(以"w"的形式写入)
+	13 14 15 16			3 * 4  ---> 4为循坏不变量
+	9  10 11 12			2 * 4
+	5  6  7  8			1 * 4
+	1  2  3  4			0 * 4
+	
+*/
+void print_matrix()
+{
+	int i = 0;
+	FILE* pf_write = fopen("test6.dat", "w");
+	if (pf_write == NULL)
+	{
+		perror("文件流开辟失败");
+	}
+	for (i = 3; i >= 0; i--)
+	{
+		int j = 0;
+		for (j = 1; j <= 4; j++)
+		{
+			fprintf(pf_write, "%2d ", (i * 4) + j);
+		}
+		fprintf(pf_write, "\n");
+	}
+
+	fclose(pf_write);
+	pf_write = NULL;
+}
+
+int main()
+{
+	print_matrix();
+	int arr[4][4] = { 0 };
+	FILE* pf_read = fopen("test6.dat", "r");
+	for (int i = 0; i < 4; i++)
+	{
+		for (int j = 0; j < 4; j++) 
+		{
+			fscanf(pf_read, "%2d ", &arr[i][j]);
+		}
+	}
+	fclose(pf_read);
+	pf_read = NULL;
+	return 0;
+}
+```
+
 ---
 
 ## fwrite()
@@ -579,6 +641,39 @@ int main()
 - stream -- 这是指向 FILE 对象的指针，该 FILE 对象指定了一个输入流。
 
 返回值: 成功读取的元素总数会以 size_t 对象返回，size_t 对象是一个整型数据类型。如果总数与 nmemb 参数不同，则可能发生了一个错误或者到达了文件末尾。
+
+> `fread`在读文件时, 没有像`fgets`那样在`n-1`的位置停止的那种
+
+```c
+int main()
+{
+	//写操作
+	char name[] = "wangjianian";
+	FILE* pf_write = fopen("test6.dat", "w");
+	if (pf_write == NULL)
+	{
+		perror("文件流开辟失败");
+		return (-1);
+	};
+	fwrite(name, sizeof(char), my_strlen(name), pf_write);
+	fclose(pf_write);
+	pf_write = NULL;
+	//读操作
+	char ac[11] = { 0 };
+	FILE* pr_read = fopen("test6.dat", "r");
+	if (pr_read == NULL)
+	{
+		perror("文件流开辟失败");
+		return (-1);
+	};
+	/* fread在读的时候不会在第n个位置补'\0', fread在读方面是通用的,
+	 而fgets只适用于字符串读操作 */ 
+	fread(ac, sizeof(char), 11, pr_read);
+	return 0;
+}
+```
+
+![fread的细节](img/fread的细节.png "fread的细节")
 
 ---
 
@@ -791,7 +886,7 @@ int main()
 
 ## strlen()
 
-语法: `size_t strlen(const char* str)`
+声明: `size_t strlen(const char* str)`
 
 - str -- 要计算长度的字符串.
 
@@ -803,11 +898,23 @@ int main()
 >
 > 3. 当无符号数 - 无符号数时结果也是一个无符号数, 是一个>=0的数
 
+```c
+#include <string.h>
+#include <stdio.h>
+int main()
+{
+	char ac[] = "WangJiaNian";
+	int i = (int)strlen(ac);
+	printf("%d\n", i);// 11
+ 	return 0;
+}
+```
+
 ---
 
 ## strcpy()
 
-语法：`strcpy(目标字符串, 源字符串)`
+声明：`strcpy(目标字符串, 源字符串)`
 
 `char *strcpy(char *dest, const char *src)`
 
@@ -859,16 +966,30 @@ return value: destination string(目标字符串)
 
 ## strcmp()
 
-语法:`int strcmp(const char *str1, const char *str2);`
+声明:`int strcmp(const char *str1, const char *str2);`
 
 - str1 -- 要进行比较的第一个字符串.
 - str2 -- 要进行比较的第二个字符串.
 
 返回值如下:
 
-- 如果返回值 < 0，则表示 str1 小于 str2。
-- 如果返回值 > 0，则表示 str1 大于 str2。
-- 如果返回值 = 0，则表示 str1 等于 str2。
+- 如果返回值 < 0，则表示 str1 < str2。
+- 如果返回值 > 0，则表示 str1 > str2。
+- 如果返回值 = 0，则表示 str1 = str2。
+
+```c
+#include <string.h>
+#include <stdio.h>
+int main()
+{
+	char ac1[] = "wang";
+	char ac2[] = "jia";
+	// 'w' > 'j' 所以返回 1
+	int i = strcmp(ac1, ac2);
+	printf("%d\n", i);// 1
+	return 0;
+}
+```
 
 > 该函数接受两个参数，分别是要比较的两个字符串str1和str2。如果两个字符串相等，函数返回值为0；如果str1小于str2，返回值为负数；如果str1大于str2，返回值为正数。
 >
@@ -880,7 +1001,7 @@ return value: destination string(目标字符串)
 
 ## strcat()
 
-语法: `char* strcat(char* dest, const char* src)`
+声明: `char* strcat(char* dest, const char* src)`
 
 功能:合并字符串
 
@@ -889,22 +1010,46 @@ return value: destination string(目标字符串)
 
 > 注意点`strcat`无法自己追加自己
 
+```c
+int main()
+{
+	//需确保目标字符串dest有着足够的空间来容纳源字符串的长度
+	char ac1[50] = "wangjianian";
+	char ac2[] = "handsome";
+	char* result = strcat(ac1, ac2);
+	printf("%s\n", result);// wangjianianhandsome
+	return 0;
+}
+```
+
 ---
 
 ## strstr()
 
-语法: `char* strstr(const char* haystack, const char* needle)`
+声明: `char* strstr(const char* haystack, const char* needle)`
 
 - haystack -- 要被检索的 C 字符串。
 - needle -- 在 haystack 字符串内要搜索的小字符串。
 
 返回值: `haystack`中第一次出现`needle`字符串的位置的地址，如果未找到则返回`NULL空指针`
 
+```c
+int main()
+{
+	char ac1[50] = "wangjianian";
+	char ac2[] = "jia";
+	// 返回被找到位置的指针
+	char* result = strstr(ac1, ac2);
+	printf("%s\n", result);// jianian
+	return 0;
+}
+```
+
 ---
 
 ## strncat()
 
-语法: `char* strncat(char* dest, const char* src, size_t count)`
+声明: `char* strncat(char* dest, const char* src, size_t count)`
 
 功能:合并字符串,且可以合并自己
 
@@ -912,16 +1057,29 @@ return value: destination string(目标字符串)
 - src -- 要追加的字符串。
 - count -- 要追加的最大字符数。
 
+```c
+int main()
+{
+	char ac1[20] = "wang";
+	char ac2[] = "jianian";
+	strncat(ac1, ac2, strlen(ac2));// wangjianian
+	// strncat(ac1, ac1, strlen(ac1));// wangwang 追加自己
+	return 0;
+}
+```
+
 > - 追加`count`个字符之后会主动补一个`'\0'`
 > - 当`count` > 实际的`src`长度时, 多余的部分直接放弃不管
 > 
 > [strncat的注意点参考strncat的细节](./show_detail/detail.md#strncat的细节)
+>
+> [strncat函数实现参考头文件实现strcat()](./subject/头文件实现.md#strncat)
 
 ---
 
 ## strncpy()
 
-语法: `char* strncpy(char* dest, const char* src, size_t count)`
+声明: `char* strncpy(char* dest, const char* src, size_t count)`
 
 - dest -- 指向用于存储复制内容的目标数组。
 - src -- 要复制的字符串。
@@ -932,17 +1090,32 @@ return value: destination string(目标字符串)
 > 如果`count`的长度大于`src`, 超出的长度会给dest补`0`
 >
 > [strncpy的注意点参考strncpy的细节](./show_detail/detail.md#strncpy的细节)
+>
+> [strncpy函数实现参考头文件实现strncpy()](./subject//头文件实现.md#strncpy)
 
 ---
 
 ## strtok()
 
-语法: `char* strtok(char* str, const char* delim)`
-
+声明: `char* strtok(char* str, const char* delim)`
+              
 - str -- 要被分解成一组小字符串的字符串.
 - delim -- 包含分隔符的C字符串。
 
 返回值: 被分解的第一个子字符串，如果没有可检索的字符串，则返回一个空指针.
+
+```c
+int main()
+{
+	
+	char ac2[] = "!@";
+	char ac1[30] = "wang!jia@nian";
+	char* ac3 = strtok(ac1, ac2);// wang
+	// 再次使用strtok函数时, str为NULL代表着对上次使用的str再次进行分解
+	char* ac4 = strtok(NULL, ac2);// jia
+	return 0;
+}
+```
 
 > `strtok`函数会改变原来的字符串, 所以在使用时最好提前备份. 
 >
@@ -952,11 +1125,24 @@ return value: destination string(目标字符串)
 
 ## strerror()
 
-语法: `char* strerror(int errnum)`
+声明: `char* strerror(int errnum)`
 
 - errnum -- 错误号，通常是 `errno`.
 
 返回值: 一个指向错误字符串的指针，该错误字符串描述了错误errnum(错误信息)。
+
+```c
+int main()
+{
+	//假设这里的test5.txt不存在
+	FILE* pc_read = fopen("test5.txt", "r");
+	if (pc_read == NULL)
+	{
+		printf("%s\n", strerror(errno));// No such file or directory
+	}
+	return 0;
+}
+```
 
 > [`errno`的作用参考errno.h头文件的errno](#errno)
 
@@ -964,7 +1150,7 @@ return value: destination string(目标字符串)
 
 ## memcpy()
 
-语法: `void* memcpy(void* dest, const void* src, size_t num)`
+声明: `void* memcpy(void* dest, const void* src, size_t num)`
 
 作用: 在内存中将`src`的数据copy到`dest`中
 
@@ -974,6 +1160,21 @@ return value: destination string(目标字符串)
 
 在使用时最好不要令`dest`与`src`一直, 如果必须则最好使用`memmove()`
 
+```c
+int main()
+{
+	char ac1[20] = "liusjianian";
+	char ac2[] = "wang";
+	memcpy(ac1, ac2, strlen(ac2));// wangjianian
+	//运用在整形数组
+	int arr1[9] = { 23, 45, 97,4,5,6,7,8,9 };
+	int arr2[3] = { 1,2,3 };
+	memcpy(arr1, arr2, sizeof(arr2));
+	// 1 2 3 4 5 6 7 8 9
+	return 0;
+}
+```
+
 > [`memcpy`函数使用参考这里](./show_detail/detail.md#memcpy基本使用)
 >
 > [`memcpy`实现方式参考这里](./subject/头文件实现.md#memcpy)
@@ -982,7 +1183,7 @@ return value: destination string(目标字符串)
 
 ## memset()
 
-语法: `void* memset(void *str, int c, size_t n)`
+声明: `void* memset(void *str, int c, size_t n)`
 
 作用: 复制字符 c（一个无符号字符）到参数 str 所指向的字符串的前 n 个字符
 
@@ -990,11 +1191,21 @@ return value: destination string(目标字符串)
 - c -- 要被设置的值。该值以`int`形式传递，但是函数在填充内存块时是使用该值的无符号字符形式。
 - n -- 要被设置为该值的字符数。
 
+```c
+int main()
+{
+	char ac1[20] = "liusjianian";
+	char c = 'A';
+	memset(ac1, c, 4);// AAAAjianian
+	return 0;
+}
+```
+
 ---
 
 # <assert.h>
 
-语法:`assert(condition)`
+声明:`assert(condition)`
 
 若用户指定的条件非true，则异常终止程序。可以在发行版本禁用。
 
@@ -1187,6 +1398,120 @@ int main()
 	printf("%d\n", OFFSETOF(struct STU, c1));
 	printf("%d\n", OFFSETOF(struct STU, a));
 	printf("%d\n", OFFSETOF(struct STU, c2));
+	return 0;
+}
+```
+
+---
+
+# <math.h>
+
+## pow()
+
+作用: 返回`x`的`y`次幂, 相当于x的y次方.
+
+声明: `double pow(double x, double y)`
+
+- x -- 代表基数的浮点值。
+- y -- 代表指数的浮点值。
+
+返回值: 返回`x`的`y`次幂
+
+```c
+#include <math.h>
+int main(){
+	double x = 2.0;
+	double y = 3.0;
+	double result = pow(x, y);
+	printf("%lf\n", result);// 8.000000
+	return 0;
+}
+```
+
+---
+
+## sqrt()
+
+作用: 返回`x`的平方根
+
+声明: `double sqrt(double x)`
+
+- x -- 一个数
+
+返回值: `x`的平方根
+
+```c
+int main(){
+	double x = 4.0;
+	double result = sqrt(x);
+	printf("%lf\n", result);// 2.000000
+	return 0;
+}
+```
+
+---
+
+## fabs()
+
+作用: 计算浮点数`x`的绝对值
+
+声明1: `double fabs(double x)` 
+
+声明2: `float fabsf(float x)`
+
+声明3: `long double fabsl(long double x)`
+
+返回值: 如果`x`为正, 则返回`x`; 为负则返回它的相反数`-x`; 为0返回0
+
+```c
+int main(){
+	double x = -4.0;
+	double result = fabs(x);
+	printf("%lf\n", result);// 4.000000
+	return 0;
+}
+```
+
+> `fabs()`函数可以用于`double`、`float` 和 `long double` 类型的参数。如果需要计算整数的绝对值，应该使用`abs()`函数。
+
+---
+
+## floor()
+
+作用: 返回小于或等于`x`的最大的整数值. 例如`3.2`则返回`3.0`; `3.9`也返回`3.0`
+
+声明: `double floor(double x)`
+
+- x -- 浮点数
+
+返回值: 不大于`x`的最大整数值
+
+```c
+int main(){
+	double x = 3.2;
+	double result = floor(x);
+	printf("%lf\n", result);// 3.000000
+	return 0;
+}
+```
+
+---
+
+## ceil()
+
+作用: 返回大于或等于`x`的最小的整数值. 例如: `3.2`则返回`4.0`
+
+声明: `double ceil(double x)`
+
+- x -- 浮点数
+
+返回值: 不小于 x 的最小整数值
+
+```c
+int main(){
+	double x = 3.2;
+	double result = ceil(x);
+	printf("%lf\n", result);// 4.000000
 	return 0;
 }
 ```
